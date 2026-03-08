@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404 | WhatsRecuperaVentas</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        font-family: Inter, Segoe UI, sans-serif;
+        background:
+          radial-gradient(circle at 20% 20%, rgba(64, 226, 129, 0.3), transparent 38%),
+          radial-gradient(circle at 80% 75%, rgba(19, 98, 206, 0.3), transparent 40%),
+          #040b16;
+        color: #f8fafc;
+      }
+      .card {
+        width: min(760px, 100%);
+        border: 1px solid rgba(16, 185, 129, 0.25);
+        border-radius: 20px;
+        background: rgba(2, 6, 23, 0.72);
+        box-shadow: 0 20px 50px rgba(16, 185, 129, 0.18);
+        backdrop-filter: blur(10px);
+        padding: 32px;
+        text-align: center;
+      }
+      h1 {
+        font-size: clamp(40px, 7vw, 64px);
+        margin: 0 0 8px;
+      }
+      p {
+        color: #cbd5e1;
+        margin: 0 auto 24px;
+        max-width: 560px;
+        line-height: 1.6;
+      }
+      a {
+        display: inline-block;
+        text-decoration: none;
+        font-weight: 600;
+        border-radius: 10px;
+        padding: 12px 20px;
+      }
+      .primary {
+        background: #10b981;
+        color: #052e2b;
+      }
+      .secondary {
+        border: 1px solid rgba(148, 163, 184, 0.5);
+        color: #e2e8f0;
+        margin-left: 8px;
+      }
+      @media (max-width: 600px) {
+        .card {
+          padding: 24px;
+        }
+        .secondary {
+          margin-left: 0;
+          margin-top: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <div style="letter-spacing: 0.18em; text-transform: uppercase; font-size: 12px; color: #86efac; margin-bottom: 8px;">
+        WhatsRecuperaVentas
+      </div>
+      <h1>Error 404</h1>
+      <p>
+        La página que intentas abrir no existe o fue movida. Puedes volver al inicio para continuar con tu flujo comercial.
+      </p>
+      <a class="primary" href="/">Ir al inicio</a>
+      <a class="secondary" href="javascript:history.back()">Volver</a>
+    </main>
+  </body>
+</html>
