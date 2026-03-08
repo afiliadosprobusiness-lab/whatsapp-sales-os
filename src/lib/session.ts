@@ -16,8 +16,12 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const getAuthMessage = (error: unknown, fallback: string) =>
-  authServiceErrors.getMessage(error, fallback);
+const getAuthMessage = (error: unknown, fallback: string) => authServiceErrors.getMessage(error, fallback);
+
+const getStatusFromError = (error: unknown): AuthStatus => {
+  const normalized = authServiceErrors.normalize(error);
+  return normalized.status === 401 ? "unauthorized" : "error";
+};
 
 export function getUserInitials(user: Pick<AuthUser, "fullName" | "email"> | null): string {
   if (!user) {
@@ -30,12 +34,16 @@ export function getUserInitials(user: Pick<AuthUser, "fullName" | "email"> | nul
   }
 
   const parts = cleanName.split(" ").filter(Boolean);
-  const initials = parts.slice(0, 2).map((part) => part[0]?.toUpperCase() ?? "").join("");
+  const initials = parts
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+
   return initials || user.email.slice(0, 2).toUpperCase();
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [status, setStatus] = useState<AuthStatus>("loading");
+  const [status, setStatus] = useState<AuthStatus>("idle");
   const [user, setUser] = useState<AuthUser | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,58 +58,70 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await authService.me();
       setUser(response.user);
-      setStatus("authenticated");
+      setStatus("success");
     } catch (authError) {
-      const normalized = authServiceErrors.normalize(authError);
       setUser(null);
-      setStatus("unauthenticated");
 
-      if (normalized.status !== 401) {
-        setError(getAuthMessage(authError, "No se pudo validar tu sesión."));
+      const nextStatus = getStatusFromError(authError);
+      setStatus(nextStatus);
+
+      if (nextStatus === "error") {
+        setError(getAuthMessage(authError, "No se pudo validar tu sesion."));
       }
     }
   }, []);
 
   const login = useCallback(async (payload: AuthLoginRequest) => {
+    setStatus("loading");
     setError(null);
 
     try {
       const response = await authService.login(payload);
       setUser(response.user);
-      setStatus("authenticated");
+      setStatus("success");
       return response.user;
     } catch (authError) {
       setUser(null);
-      setStatus("unauthenticated");
-      setError(getAuthMessage(authError, "No pudimos iniciar tu sesión."));
+      const nextStatus = getStatusFromError(authError);
+      setStatus(nextStatus);
+      setError(getAuthMessage(authError, "No pudimos iniciar sesion."));
       throw authError;
     }
   }, []);
 
   const register = useCallback(async (payload: AuthRegisterRequest) => {
+    setStatus("loading");
     setError(null);
 
     try {
       const response = await authService.register(payload);
       setUser(response.user);
-      setStatus("authenticated");
+      setStatus("success");
       return response.user;
     } catch (authError) {
       setUser(null);
-      setStatus("unauthenticated");
+      const nextStatus = getStatusFromError(authError);
+      setStatus(nextStatus);
       setError(getAuthMessage(authError, "No pudimos crear tu cuenta."));
       throw authError;
     }
   }, []);
 
   const logout = useCallback(async () => {
+    setStatus("loading");
     setError(null);
 
     try {
       await authService.logout();
+    } catch (authError) {
+      const normalized = authServiceErrors.normalize(authError);
+      if (normalized.status !== 401) {
+        setError(getAuthMessage(authError, "No pudimos cerrar tu sesion."));
+        throw authError;
+      }
     } finally {
       setUser(null);
-      setStatus("unauthenticated");
+      setStatus("unauthorized");
     }
   }, []);
 
@@ -113,7 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       user,
       status,
-      isAuthenticated: status === "authenticated" && !!user,
+      isAuthenticated: status === "success" && !!user,
       error,
       login,
       register,

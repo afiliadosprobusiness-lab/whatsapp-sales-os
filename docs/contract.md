@@ -7,7 +7,7 @@ Current status in codebase:
 - SPA with React + React Router.
 - All domain screens exist as routes.
 - Data in screens is static/mock (local arrays inside page components).
-- There is no API integration layer yet (no service/repository/fetch abstraction in use).
+- Auth module is integrated to production API with cookie session; non-auth modules remain static/mock.
 - `@tanstack/react-query` is configured globally, but not yet used by pages.
 
 Routes implemented:
@@ -264,8 +264,15 @@ Contract:
 - `POST /auth/login`
 - `POST /auth/register`
 - `POST /auth/logout`
-- `POST /auth/refresh`
 - `GET /auth/me`
+- Transport requirements:
+  - `Content-Type: application/json`
+  - `credentials: "include"`
+  - No token persistence in `localStorage`
+- Expected success envelope:
+  - `{ data: { user: { id, fullName|name, email, role? } }, error: null }`
+- Expected error envelope:
+  - `{ data: null, error: { code, message, details?.fieldErrors? } }`
 
 ### 8.2 Users / Workspace
 UI evidence:
@@ -425,8 +432,15 @@ Contract:
 
 ## 10) Current gaps to preserve during implementation
 
-- There is no authentication guard; navigation to dashboard routes is open.
+- Authentication guards are active for private routes and guest-only auth routes.
+- Auth API integration is active; remaining domain modules are still UI-only mock data.
 - `Index.tsx` exists but is not routed from `App.tsx`.
 - `App.css` keeps Vite template styles and appears unused by current pages.
 - UTF-8/encoding artifacts are visible in multiple Spanish strings.
 - Domain logic is UI-only right now; no persistence or backend contract enforcement implemented.
+
+## 11) Contract changelog
+
+| Date | Change | Type | Impact |
+|---|---|---|---|
+| 2026-03-08 | Auth contract aligned to real backend usage (`/auth/register`, `/auth/login`, `/auth/logout`, `/auth/me`) with `{data,error}` envelope and cookie session transport rules. | non-breaking | Frontend auth now depends on backend cookie session and backend error envelope parsing. |

@@ -1,10 +1,14 @@
-export type AuthStatus = "loading" | "authenticated" | "unauthenticated";
+export type AuthStatus = "idle" | "loading" | "success" | "error" | "unauthorized";
+
+export type AuthRole = "ADMIN" | "SELLER" | "VIEWER";
+
+export type AuthFieldErrors = Record<string, string>;
 
 export interface AuthUser {
   id: string;
   fullName: string;
   email: string;
-  role: "ADMIN" | "SELLER" | "VIEWER";
+  role: AuthRole;
 }
 
 export interface AuthLoginRequest {
@@ -21,6 +25,12 @@ export interface AuthRegisterRequest {
   acceptTerms: boolean;
 }
 
+export interface AuthRegisterPayload {
+  fullName: string;
+  email: string;
+  password: string;
+}
+
 export interface AuthResponse {
   user: AuthUser;
 }
@@ -28,14 +38,25 @@ export interface AuthResponse {
 export interface AuthErrorPayload {
   message: string;
   code?: string;
-  fieldErrors?: Record<string, string>;
+  fieldErrors?: AuthFieldErrors;
   status?: number;
+}
+
+export interface AuthApiErrorPayload {
+  code?: string;
+  message?: string;
+  details?: unknown;
+}
+
+export interface AuthApiEnvelope<TData> {
+  data: TData | null;
+  error: AuthApiErrorPayload | null;
 }
 
 export class AuthServiceError extends Error {
   code?: string;
   status?: number;
-  fieldErrors?: Record<string, string>;
+  fieldErrors?: AuthFieldErrors;
 
   constructor(payload: AuthErrorPayload) {
     super(payload.message);
@@ -45,4 +66,3 @@ export class AuthServiceError extends Error {
     this.fieldErrors = payload.fieldErrors;
   }
 }
-

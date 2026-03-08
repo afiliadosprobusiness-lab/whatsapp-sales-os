@@ -9,13 +9,13 @@
 ## Current Auth Architecture
 - `src/lib/session.ts` centralizes authenticated user state for the entire app.
 - `src/services/auth.service.ts` is the only place with auth request logic.
-- Service supports two strategies:
-  - API strategy with `fetch` + `credentials: "include"` against:
-    - `POST /auth/register`
-    - `POST /auth/login`
-    - `POST /auth/logout`
-    - `GET /auth/me`
-  - Mock strategy in memory (default) to keep UI decoupled while backend is pending.
+- Service uses production API strategy only with `fetch` + `credentials: "include"` against:
+  - `POST /auth/register`
+  - `POST /auth/login`
+  - `POST /auth/logout`
+  - `GET /auth/me`
+- API base URL is read from `VITE_API_URL` (fallback `VITE_API_BASE_URL`, then production URL default).
+- Auth state machine in provider: `idle | loading | success | error | unauthorized`.
 - No sensitive auth data is stored in `localStorage`.
 
 ## Route Access Model

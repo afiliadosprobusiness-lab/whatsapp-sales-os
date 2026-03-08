@@ -16,7 +16,7 @@ export function RequireAuth() {
   const { isAuthenticated, status } = useAuth();
   const location = useLocation();
 
-  if (status === "loading") {
+  if (status === "idle" || status === "loading") {
     return <AuthLoadingScreen />;
   }
 
@@ -27,4 +27,3 @@ export function RequireAuth() {
 
   return <Outlet />;
 }
-

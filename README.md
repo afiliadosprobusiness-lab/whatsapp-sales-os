@@ -14,8 +14,14 @@ Aplicacion web SaaS para organizar leads, recuperar ventas y optimizar conversio
 
 ```sh
 npm install
+copy .env.example .env
 npm run dev
 ```
+
+## Variables de entorno
+
+- `VITE_API_URL`: URL base del backend (auth real por cookie).
+  - Produccion actual: `https://backend-production-80db.up.railway.app`
 
 ## Scripts
 

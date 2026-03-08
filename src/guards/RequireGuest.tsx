@@ -15,7 +15,7 @@ function AuthLoadingScreen() {
 export function RequireGuest() {
   const { isAuthenticated, status } = useAuth();
 
-  if (status === "loading") {
+  if (status === "idle" || status === "loading") {
     return <AuthLoadingScreen />;
   }
 
@@ -25,4 +25,3 @@ export function RequireGuest() {
 
   return <Outlet />;
 }
-

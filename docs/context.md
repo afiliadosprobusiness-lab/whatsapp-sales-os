@@ -28,8 +28,9 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
 ### B) Auth Context
 - Purpose: user sign-in and account registration entry point.
 - Responsibilities:
-  - Login and register forms with loading/error/success states.
+  - Login and register forms with `idle | loading | success | error | unauthorized` status handling.
   - Session bootstrap (`GET /auth/me`) on app init through a central provider.
+  - Use backend httpOnly cookie session as source of truth (`credentials: include`).
   - Route protection for private screens (`RequireAuth`) and guest-only auth pages (`RequireGuest`).
   - Logout action from private shell components.
 - Main screens/components:
@@ -233,8 +234,9 @@ Shared responsibilities:
 
 ## 6) Current context-level constraints and risks
 
-- Auth backend is still pending; auth flows run on a mock strategy isolated in `auth.service` and can switch to real API without touching page components.
+- Auth is integrated against production backend (`https://backend-production-80db.up.railway.app`) through `VITE_API_URL` (fallback `VITE_API_BASE_URL`).
 - No token or sensitive session data is persisted in `localStorage`; intended production strategy is cookie httpOnly + `GET /auth/me`.
+- Backend CORS currently whitelists `http://localhost:5173`; deployed frontend domain must be added in backend `FRONTEND_URL`.
 - Role-based route gating is still pending (only authenticated/guest guards are implemented).
 - No explicit cross-context store; each page owns local mock data.
 - Some text encoding artifacts appear in Spanish labels; should be normalized before production content freeze.

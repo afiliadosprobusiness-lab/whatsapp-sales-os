@@ -7,8 +7,8 @@ import { authServiceErrors } from "@/services/auth.service";
 
 export default function Login() {
   const [showPass, setShowPass] = useState(false);
-  const [email, setEmail] = useState("demo@whatssalesrecovery.com");
-  const [password, setPassword] = useState("Demo123456!");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -97,12 +97,6 @@ export default function Login() {
 
           <h1 className="font-display text-2xl font-bold mb-1">Bienvenido de vuelta</h1>
           <p className="text-sm text-muted-foreground mb-8">Ingresa tus credenciales para acceder a tu cuenta</p>
-          <div className="mb-6 rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs">
-            <p className="font-semibold text-foreground">Credenciales de prueba</p>
-            <p className="mt-1 text-muted-foreground">Usuario: demo@whatssalesrecovery.com</p>
-            <p className="text-muted-foreground">Password: Demo123456!</p>
-          </div>
-
           <form className="space-y-4" onSubmit={handleSubmit} noValidate>
             <div>
               <label className="text-xs font-medium text-muted-foreground mb-1.5 block" htmlFor="login-email">
