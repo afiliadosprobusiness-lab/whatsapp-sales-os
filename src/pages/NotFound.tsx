@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+﻿import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowLeft, Home } from "lucide-react";
 
@@ -20,12 +20,12 @@ const NotFound = () => {
       />
       <div className="relative z-10 w-full max-w-2xl rounded-2xl border border-emerald-400/20 bg-slate-950/70 p-8 text-center shadow-2xl shadow-emerald-900/30 backdrop-blur md:p-12">
         <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-emerald-300/90">
-          WhatsRecuperaVentas
+          WhatsSalesRecovery
         </p>
         <h1 className="text-5xl font-bold leading-tight text-white md:text-6xl">Error 404</h1>
         <p className="mx-auto mt-5 max-w-xl text-base text-slate-300 md:text-lg">
           La ruta <span className="font-semibold text-emerald-300">{location.pathname}</span> no existe o fue movida.
-          Regresa al inicio y continúa tu flujo de trabajo.
+          Regresa al inicio y continua tu flujo de trabajo.
         </p>
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link
@@ -50,3 +50,4 @@ const NotFound = () => {
 };
 
 export default NotFound;
+

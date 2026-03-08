@@ -200,4 +200,43 @@
   .ventrix-section {
     @apply py-20 px-6;
   }
+
+  .wsr-marquee-mask {
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  }
+
+  .wsr-marquee-track {
+    display: flex;
+    width: max-content;
+    gap: 1rem;
+    animation: wsr-marquee-left 42s linear infinite;
+  }
+
+  .wsr-marquee-reverse {
+    animation-name: wsr-marquee-right;
+    animation-duration: 48s;
+  }
+
+  .wsr-marquee-track:hover {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes wsr-marquee-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes wsr-marquee-right {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
