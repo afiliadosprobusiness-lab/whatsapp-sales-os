@@ -28,15 +28,20 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
 ### B) Auth Context
 - Purpose: user sign-in and account registration entry point.
 - Responsibilities:
-  - Login form capture.
-  - Registration form capture and terms acceptance.
-  - Session entry transition to dashboard.
+  - Login and register forms with loading/error/success states.
+  - Session bootstrap (`GET /auth/me`) on app init through a central provider.
+  - Route protection for private screens (`RequireAuth`) and guest-only auth pages (`RequireGuest`).
+  - Logout action from private shell components.
 - Main screens/components:
   - `src/pages/Login.tsx`
   - `src/pages/Register.tsx`
+  - `src/lib/session.ts`
+  - `src/guards/RequireAuth.tsx`
+  - `src/guards/RequireGuest.tsx`
+  - `src/services/auth.service.ts`
 - Inputs/outputs:
   - Input: credentials/profile fields.
-  - Output: session token + user/workspace context (future), route to `/dashboard`.
+  - Output: authenticated user context for UI, route to private modules, logout to `/login`.
 
 ### C) Workspace and Access Context
 - Purpose: represent account scope, members, and business profile.
@@ -228,7 +233,8 @@ Shared responsibilities:
 
 ## 6) Current context-level constraints and risks
 
-- Contexts are visually complete but behaviorally mocked (no persistence/API).
-- No explicit Auth guard or role-based route gating is implemented.
+- Auth backend is still pending; auth flows run on a mock strategy isolated in `auth.service` and can switch to real API without touching page components.
+- No token or sensitive session data is persisted in `localStorage`; intended production strategy is cookie httpOnly + `GET /auth/me`.
+- Role-based route gating is still pending (only authenticated/guest guards are implemented).
 - No explicit cross-context store; each page owns local mock data.
 - Some text encoding artifacts appear in Spanish labels; should be normalized before production content freeze.

@@ -1,10 +1,20 @@
 import { Link, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, Users, MessageSquare, Bot, RefreshCw,
-  Upload, Megaphone, Target, Lightbulb, TrendingUp, BarChart3,
-  Settings
+  LayoutDashboard,
+  Users,
+  MessageSquare,
+  Bot,
+  RefreshCw,
+  Upload,
+  Megaphone,
+  Target,
+  Lightbulb,
+  TrendingUp,
+  BarChart3,
+  Settings,
 } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
+import { getUserInitials, useAuth } from "@/lib/session";
 
 const navItems = [
   { label: "Overview", icon: LayoutDashboard, path: "/dashboard" },
@@ -23,14 +33,13 @@ const advancedItems = [
   { label: "Revenue Reports", icon: BarChart3, path: "/revenue-reports" },
 ];
 
-const bottomItems = [
-  { label: "Configuración", icon: Settings, path: "/settings" },
-];
+const bottomItems = [{ label: "Configuración", icon: Settings, path: "/settings" }];
 
 export function AppSidebar() {
   const location = useLocation();
+  const { user } = useAuth();
 
-  const renderItem = (item: typeof navItems[0]) => {
+  const renderItem = (item: (typeof navItems)[0]) => {
     const active = location.pathname === item.path;
     return (
       <Link
@@ -51,34 +60,38 @@ export function AppSidebar() {
 
   return (
     <aside className="w-60 bg-sidebar flex flex-col border-r border-sidebar-border flex-shrink-0">
-      {/* Logo */}
       <div className="h-14 flex items-center px-4 border-b border-sidebar-border">
         <BrandLogo size="sm" />
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
         <div className="space-y-1">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 px-3 mb-2">Principal</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 px-3 mb-2">
+            Principal
+          </p>
           {navItems.map(renderItem)}
         </div>
         <div className="space-y-1">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 px-3 mb-2">Inteligencia</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 px-3 mb-2">
+            Inteligencia
+          </p>
           {advancedItems.map(renderItem)}
         </div>
       </nav>
 
-      {/* Bottom */}
       <div className="p-3 border-t border-sidebar-border space-y-1">
         {bottomItems.map(renderItem)}
         <div className="flex items-center gap-3 px-3 py-2 mt-2">
-          <div className="w-7 h-7 rounded-full bg-sidebar-primary/20 flex items-center justify-center text-xs font-semibold text-sidebar-primary">MR</div>
+          <div className="w-7 h-7 rounded-full bg-sidebar-primary/20 flex items-center justify-center text-xs font-semibold text-sidebar-primary">
+            {getUserInitials(user)}
+          </div>
           <div className="min-w-0">
-            <p className="text-xs font-medium text-sidebar-accent-foreground truncate">María Rodríguez</p>
-            <p className="text-[10px] text-sidebar-foreground truncate">maria@tienda.co</p>
+            <p className="text-xs font-medium text-sidebar-accent-foreground truncate">{user?.fullName ?? "Usuario"}</p>
+            <p className="text-[10px] text-sidebar-foreground truncate">{user?.email ?? "sin-email@local"}</p>
           </div>
         </div>
       </div>
     </aside>
   );
 }
+

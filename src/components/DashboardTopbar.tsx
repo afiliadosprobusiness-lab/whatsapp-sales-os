@@ -1,6 +1,28 @@
-import { Search, Bell, ChevronDown, Plus } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Search, Bell, ChevronDown, Plus, LogOut } from "lucide-react";
+import { toast } from "@/components/ui/sonner";
+import { getUserInitials, useAuth } from "@/lib/session";
+import { authServiceErrors } from "@/services/auth.service";
 
 export function DashboardTopbar({ title }: { title: string }) {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+
+    try {
+      await logout();
+      navigate("/login", { replace: true });
+    } catch (error) {
+      toast.error(authServiceErrors.getMessage(error, "No pudimos cerrar tu sesión."));
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   return (
     <header className="h-14 border-b bg-card flex items-center justify-between px-6 flex-shrink-0">
       <h1 className="font-display font-semibold text-lg">{title}</h1>
@@ -18,7 +40,7 @@ export function DashboardTopbar({ title }: { title: string }) {
 
         {/* Workspace */}
         <button className="ventrix-btn-secondary h-8 px-3 text-xs flex items-center gap-1.5">
-          Mi Tienda Online
+          Workspace principal
           <ChevronDown className="h-3 w-3" />
         </button>
 
@@ -34,9 +56,20 @@ export function DashboardTopbar({ title }: { title: string }) {
           <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary" />
         </button>
 
+        {/* Logout */}
+        <button
+          type="button"
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          className="h-8 px-3 rounded-lg text-xs border border-input flex items-center gap-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-60"
+        >
+          <LogOut className="h-3.5 w-3.5" />
+          {isLoggingOut ? "Saliendo..." : "Salir"}
+        </button>
+
         {/* Avatar */}
         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary">
-          MR
+          {getUserInitials(user)}
         </div>
       </div>
     </header>
