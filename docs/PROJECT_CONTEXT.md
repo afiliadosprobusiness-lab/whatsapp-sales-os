@@ -26,6 +26,17 @@
 - Settings now handles `loading | error | empty | success` states for workspace profile data.
 - React Query key base is `workspaceQueryKeys.me()` to support reuse in future modules (Leads, etc.).
 
+## Current Leads Architecture
+- `src/services/leads.service.ts` handles lead requests with `fetch` + `credentials: "include"` and `{data,error}` envelope parsing.
+- Leads screen (`src/pages/Leads.tsx`) is connected to:
+  - `GET /leads` for list and pipeline.
+  - `GET /leads/:id` for detail panel.
+  - `POST /leads` for lead creation.
+  - `PATCH /leads/:id` for lead editing.
+  - `PATCH /leads/:id/status` for fast status changes.
+- Leads query keys are centralized in `leadsQueryKeys` for list/detail cache invalidation.
+- Leads UX now handles `idle | loading | success | error | empty` states end-to-end.
+
 ## Route Access Model
 - Public routes:
   - `/`

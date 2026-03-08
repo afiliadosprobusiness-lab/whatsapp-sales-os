@@ -6,9 +6,10 @@ This document describes functional and structural contracts inferred from the cu
 Current status in codebase:
 - SPA with React + React Router.
 - All domain screens exist as routes.
-- Most domain screens still render static/mock data (local arrays inside page components).
+- Most domain screens still render static/mock data (local arrays inside page components), except Auth, Workspace Settings, and Leads.
 - Auth module is integrated to production API with cookie session.
 - Settings business profile now uses real workspace API (`GET /workspace/me`, `PATCH /workspace/me`).
+- Leads module now uses real backend API (`GET /leads`, `POST /leads`, `GET /leads/:id`, `PATCH /leads/:id`, `PATCH /leads/:id/status`).
 - `@tanstack/react-query` is configured globally and is now used by Settings business profile integration.
 
 Routes implemented:
@@ -297,7 +298,7 @@ Contract:
 - `GET /leads/:leadId`
 - `POST /leads`
 - `PATCH /leads/:leadId`
-- `GET /leads/:leadId/timeline`
+- `PATCH /leads/:leadId/status`
 
 ### 8.4 Conversations
 UI evidence:
@@ -434,11 +435,11 @@ Contract:
 ## 10) Current gaps to preserve during implementation
 
 - Authentication guards are active for private routes and guest-only auth routes.
-- Auth API and workspace settings integration are active; remaining domain modules are still UI-only mock data.
+- Auth API, workspace settings, and leads integration are active; remaining domain modules are still UI-only mock data.
 - `Index.tsx` exists but is not routed from `App.tsx`.
 - `App.css` keeps Vite template styles and appears unused by current pages.
 - UTF-8/encoding artifacts are visible in multiple Spanish strings.
-- Domain logic is UI-only right now; no persistence or backend contract enforcement implemented.
+- Domain logic is still UI-only in modules not yet integrated (Conversations, Recovery, Campaigns, Revenue, etc.).
 
 ## 11) Contract changelog
 
@@ -446,3 +447,4 @@ Contract:
 |---|---|---|---|
 | 2026-03-08 | Auth contract aligned to real backend usage (`/auth/register`, `/auth/login`, `/auth/logout`, `/auth/me`) with `{data,error}` envelope and cookie session transport rules. | non-breaking | Frontend auth now depends on backend cookie session and backend error envelope parsing. |
 | 2026-03-08 | Workspace settings contract aligned to real backend usage (`/workspace/me` GET/PATCH) for business profile load/save in Settings. | non-breaking | Settings business profile no longer depends on local mocks and now persists against backend workspace scope. |
+| 2026-03-08 | Leads contract aligned to real backend usage (`/leads` GET/POST, `/leads/:id` GET/PATCH, `/leads/:id/status` PATCH) with shared `{data,error}` envelope handling. | non-breaking | Leads list/detail/create/edit/status now persist to backend in authenticated workspace scope. |

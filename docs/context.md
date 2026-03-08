@@ -72,11 +72,15 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
 ### E) Leads Context
 - Purpose: manage lead pipeline and per-lead qualification.
 - Responsibilities:
-  - Pipeline stage visibility.
-  - Lead table with priority/score/probability/value.
-  - Lead detail panel with timeline and notes.
+  - Pipeline stage visibility and real workspace lead listing.
+  - Lead table with priority/score/probability/value from backend data.
+  - Lead detail panel with backend detail fetch (`GET /leads/:id`).
+  - Basic lead operations: create, edit, and status update against backend.
+  - Explicit UI data states: `idle | loading | success | error | empty`.
 - Main screens/components:
   - `src/pages/Leads.tsx`
+  - `src/services/leads.service.ts`
+  - `src/types/leads.ts`
 - Inputs/outputs:
   - Input: lead attributes, filters, assignment.
   - Output: prioritized lead set consumed by Conversations/Recovery/Campaigns/Deal Probability.
@@ -240,5 +244,5 @@ Shared responsibilities:
 - No token or sensitive session data is persisted in `localStorage`; intended production strategy is cookie httpOnly + `GET /auth/me`.
 - Backend CORS currently whitelists `http://localhost:5173`; deployed frontend domain must be added in backend `FRONTEND_URL`.
 - Role-based route gating is still pending (only authenticated/guest guards are implemented).
-- No explicit cross-context store; most pages own local mock data, except Settings business profile which now uses React Query + workspace service.
+- No explicit cross-context store; most pages own local mock data, except Settings and Leads which now use React Query + dedicated backend services.
 - Some text encoding artifacts appear in Spanish labels; should be normalized before production content freeze.
