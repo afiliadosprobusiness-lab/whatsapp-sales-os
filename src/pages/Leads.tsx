@@ -13,8 +13,13 @@ import leadActivityService, {
   leadActivityQueryKeys,
   leadActivityServiceErrors,
 } from "@/services/lead-activity.service";
+import leadTasksService, {
+  leadTasksQueryKeys,
+  leadTasksServiceErrors,
+} from "@/services/lead-tasks.service";
 import leadsService, { leadsQueryKeys, leadsServiceErrors } from "@/services/leads.service";
 import type { LeadActivity } from "@/types/lead-activity";
+import type { CreateLeadTaskRequest, LeadTask, LeadTaskStatus, UpdateLeadTaskRequest } from "@/types/lead-tasks";
 import type {
   CreateLeadRequest,
   GetLeadsParams,
@@ -67,6 +72,18 @@ const priorityColorMap: Record<LeadPriority, string> = {
   LOW: "text-muted-foreground",
 };
 
+const taskStatusLabelMap: Record<LeadTaskStatus, string> = {
+  pending: "Pendiente",
+  done: "Hecha",
+  cancelled: "Cancelada",
+};
+
+const taskStatusBadgeMap: Record<LeadTaskStatus, string> = {
+  pending: "ventrix-badge-warning",
+  done: "ventrix-badge-success",
+  cancelled: "ventrix-badge-danger",
+};
+
 const pipelineOrder: LeadStatus[] = ["NEW", "CONTACTED", "INTERESTED", "FOLLOW_UP", "CLOSED", "LOST"];
 const statusOptions: LeadStatus[] = ["NEW", "CONTACTED", "INTERESTED", "FOLLOW_UP", "CLOSED", "LOST"];
 const priorityOptions: LeadPriority[] = ["HIGH", "MEDIUM", "LOW"];
@@ -91,6 +108,12 @@ interface LeadFormState {
   notes: string;
 }
 
+interface LeadTaskFormState {
+  title: string;
+  description: string;
+  dueAt: string;
+}
+
 const EMPTY_LEAD_FORM: LeadFormState = {
   name: "",
   email: "",
@@ -100,6 +123,12 @@ const EMPTY_LEAD_FORM: LeadFormState = {
   estimatedValue: "",
   source: "",
   notes: "",
+};
+
+const EMPTY_TASK_FORM: LeadTaskFormState = {
+  title: "",
+  description: "",
+  dueAt: "",
 };
 
 const toLeadFormState = (lead: Lead): LeadFormState => ({
@@ -211,6 +240,47 @@ const toUpdatePayload = (form: LeadFormState): UpdateLeadRequest => ({
   notes: form.notes,
 });
 
+const toDateTimeLocalInput = (value?: string | null) => {
+  if (!value) {
+    return "";
+  }
+
+  const parsed = Date.parse(value);
+  if (Number.isNaN(parsed)) {
+    return "";
+  }
+
+  const date = new Date(parsed);
+  const timezoneOffsetMs = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() - timezoneOffsetMs).toISOString().slice(0, 16);
+};
+
+const toDateTimePayload = (value: string) => {
+  const normalized = value.trim();
+  if (!normalized) {
+    return undefined;
+  }
+
+  const parsed = Date.parse(normalized);
+  if (Number.isNaN(parsed)) {
+    return undefined;
+  }
+
+  return new Date(parsed).toISOString();
+};
+
+const toTaskCreatePayload = (form: LeadTaskFormState): CreateLeadTaskRequest => ({
+  title: form.title,
+  description: form.description.trim() ? form.description : undefined,
+  dueAt: toDateTimePayload(form.dueAt),
+});
+
+const toTaskUpdatePayload = (form: LeadTaskFormState): UpdateLeadTaskRequest => ({
+  title: form.title,
+  description: form.description.trim() ? form.description : null,
+  dueAt: form.dueAt.trim() ? toDateTimePayload(form.dueAt) : null,
+});
+
 export default function Leads() {
   const queryClient = useQueryClient();
   const [isListEnabled, setIsListEnabled] = useState(false);
@@ -223,6 +293,10 @@ export default function Leads() {
   const [createForm, setCreateForm] = useState<LeadFormState>(EMPTY_LEAD_FORM);
   const [editForm, setEditForm] = useState<LeadFormState>(EMPTY_LEAD_FORM);
   const [activityNoteDraft, setActivityNoteDraft] = useState("");
+  const [createTaskForm, setCreateTaskForm] = useState<LeadTaskFormState>(EMPTY_TASK_FORM);
+  const [editTaskForm, setEditTaskForm] = useState<LeadTaskFormState>(EMPTY_TASK_FORM);
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [isEditTaskDialogOpen, setIsEditTaskDialogOpen] = useState(false);
 
   useEffect(() => {
     setIsListEnabled(true);
@@ -253,6 +327,12 @@ export default function Leads() {
   const leadActivityQuery = useQuery({
     queryKey: selectedLeadId ? leadActivityQueryKeys.list(selectedLeadId) : leadActivityQueryKeys.list("idle"),
     queryFn: () => leadActivityService.list(selectedLeadId as string),
+    enabled: Boolean(selectedLeadId),
+    retry: false,
+  });
+  const leadTasksQuery = useQuery({
+    queryKey: selectedLeadId ? leadTasksQueryKeys.list(selectedLeadId) : leadTasksQueryKeys.list("idle"),
+    queryFn: () => leadTasksService.listByLead(selectedLeadId as string),
     enabled: Boolean(selectedLeadId),
     retry: false,
   });
@@ -337,6 +417,49 @@ export default function Leads() {
       toast.error(leadActivityServiceErrors.getMessage(error, "No pudimos registrar la actividad."));
     },
   });
+  const createLeadTaskMutation = useMutation({
+    mutationFn: ({ leadId, payload }: { leadId: string; payload: CreateLeadTaskRequest }) =>
+      leadTasksService.createByLead(leadId, payload),
+    onSuccess: (_, variables) => {
+      setCreateTaskForm(EMPTY_TASK_FORM);
+      toast.success("Tarea creada correctamente.");
+      void queryClient.invalidateQueries({
+        queryKey: leadTasksQueryKeys.list(variables.leadId),
+      });
+    },
+    onError: (error) => {
+      toast.error(leadTasksServiceErrors.getMessage(error, "No pudimos crear la tarea."));
+    },
+  });
+  const updateLeadTaskMutation = useMutation({
+    mutationFn: ({ taskId, payload }: { taskId: string; payload: UpdateLeadTaskRequest }) =>
+      leadTasksService.updateById(taskId, payload),
+    onSuccess: (updatedTask) => {
+      setIsEditTaskDialogOpen(false);
+      setEditingTaskId(null);
+      setEditTaskForm(EMPTY_TASK_FORM);
+      toast.success("Tarea actualizada.");
+      void queryClient.invalidateQueries({
+        queryKey: leadTasksQueryKeys.list(updatedTask.leadId ?? selectedLeadId ?? "idle"),
+      });
+    },
+    onError: (error) => {
+      toast.error(leadTasksServiceErrors.getMessage(error, "No pudimos actualizar la tarea."));
+    },
+  });
+  const updateLeadTaskStatusMutation = useMutation({
+    mutationFn: ({ taskId, status }: { taskId: string; status: LeadTaskStatus }) =>
+      leadTasksService.updateStatusById(taskId, status),
+    onSuccess: (updatedTask) => {
+      toast.success("Estado de tarea actualizado.");
+      void queryClient.invalidateQueries({
+        queryKey: leadTasksQueryKeys.list(updatedTask.leadId ?? selectedLeadId ?? "idle"),
+      });
+    },
+    onError: (error) => {
+      toast.error(leadTasksServiceErrors.getMessage(error, "No pudimos cambiar el estado de la tarea."));
+    },
+  });
 
   const allLeads = leadsQuery.data ?? [];
   const selectedLeadSummary = selectedLeadId ? allLeads.find((lead) => lead.id === selectedLeadId) ?? null : null;
@@ -352,6 +475,10 @@ export default function Leads() {
 
   useEffect(() => {
     setActivityNoteDraft("");
+    setCreateTaskForm(EMPTY_TASK_FORM);
+    setEditTaskForm(EMPTY_TASK_FORM);
+    setEditingTaskId(null);
+    setIsEditTaskDialogOpen(false);
   }, [selectedLeadId]);
 
   const visibleLeads = useMemo(() => {
@@ -414,6 +541,16 @@ export default function Leads() {
       : leadActivityQuery.isError
         ? "error"
         : activityItems.length === 0
+          ? "empty"
+          : "success";
+  const taskItems: LeadTask[] = leadTasksQuery.data ?? [];
+  const tasksState: LeadsViewState = !selectedLeadId
+    ? "idle"
+    : leadTasksQuery.isLoading
+      ? "loading"
+      : leadTasksQuery.isError
+        ? "error"
+        : taskItems.length === 0
           ? "empty"
           : "success";
 
@@ -481,6 +618,64 @@ export default function Leads() {
     }
 
     createLeadActivityMutation.mutate({ leadId: selectedLeadId, note });
+  };
+
+  const handleCreateTaskFieldChange =
+    (field: keyof LeadTaskFormState) =>
+    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const nextValue = event.target.value;
+      setCreateTaskForm((prev) => ({ ...prev, [field]: nextValue }));
+    };
+
+  const handleEditTaskFieldChange =
+    (field: keyof LeadTaskFormState) =>
+    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const nextValue = event.target.value;
+      setEditTaskForm((prev) => ({ ...prev, [field]: nextValue }));
+    };
+
+  const handleCreateTask = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!selectedLeadId) {
+      return;
+    }
+
+    createLeadTaskMutation.mutate({
+      leadId: selectedLeadId,
+      payload: toTaskCreatePayload(createTaskForm),
+    });
+  };
+
+  const handleToggleTaskStatus = (task: LeadTask) => {
+    const nextStatus: LeadTaskStatus = task.status === "done" ? "pending" : "done";
+    updateLeadTaskStatusMutation.mutate({
+      taskId: task.id,
+      status: nextStatus,
+    });
+  };
+
+  const handleOpenEditTaskDialog = (task: LeadTask) => {
+    setEditingTaskId(task.id);
+    setEditTaskForm({
+      title: task.title,
+      description: task.description ?? "",
+      dueAt: toDateTimeLocalInput(task.dueAt),
+    });
+    setIsEditTaskDialogOpen(true);
+  };
+
+  const handleUpdateTask = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!editingTaskId) {
+      return;
+    }
+
+    updateLeadTaskMutation.mutate({
+      taskId: editingTaskId,
+      payload: toTaskUpdatePayload(editTaskForm),
+    });
   };
 
   return (
@@ -754,6 +949,143 @@ export default function Leads() {
                       Editar lead
                     </button>
                     {selectedLeadQuery.isFetching ? <p className="text-[10px] text-muted-foreground text-center">Actualizando detalle...</p> : null}
+                  </div>
+
+                  <div>
+                    <div className="mb-2 flex items-center justify-between">
+                      <p className="text-xs font-medium">Follow-up tasks</p>
+                      <button
+                        type="button"
+                        className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                        onClick={() => {
+                          void leadTasksQuery.refetch();
+                        }}
+                        disabled={leadTasksQuery.isFetching}
+                      >
+                        {leadTasksQuery.isFetching ? "Actualizando..." : "Refrescar"}
+                      </button>
+                    </div>
+
+                    <div className="space-y-2">
+                      {tasksState === "loading" ? (
+                        <div className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground flex items-center gap-2">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          Cargando tareas...
+                        </div>
+                      ) : null}
+
+                      {tasksState === "error" ? (
+                        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-xs" role="alert">
+                          <p className="font-medium text-destructive">No pudimos cargar las tareas.</p>
+                          <p className="mt-1 text-muted-foreground">
+                            {leadTasksServiceErrors.getMessage(
+                              leadTasksQuery.error,
+                              "Ocurrio un error inesperado con las tareas.",
+                            )}
+                          </p>
+                          <button
+                            type="button"
+                            className="mt-2 ventrix-btn-secondary h-7 px-2 text-[10px]"
+                            onClick={() => {
+                              void leadTasksQuery.refetch();
+                            }}
+                          >
+                            Reintentar
+                          </button>
+                        </div>
+                      ) : null}
+
+                      {tasksState === "empty" ? (
+                        <div className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
+                          Sin tareas pendientes para este lead.
+                        </div>
+                      ) : null}
+
+                      {tasksState === "success"
+                        ? taskItems.map((task) => (
+                            <div key={task.id} className="rounded-lg border p-2.5 space-y-1.5">
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="min-w-0">
+                                  <p className={`text-xs font-medium truncate ${task.status === "done" ? "line-through text-muted-foreground" : ""}`}>
+                                    {task.title}
+                                  </p>
+                                  {task.description ? (
+                                    <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2">{task.description}</p>
+                                  ) : null}
+                                  {task.dueAt ? (
+                                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                                      Vence:{" "}
+                                      {new Date(task.dueAt).toLocaleString("es-PE", {
+                                        dateStyle: "short",
+                                        timeStyle: "short",
+                                      })}
+                                    </p>
+                                  ) : null}
+                                </div>
+                                <span className={`ventrix-badge ${taskStatusBadgeMap[task.status]}`}>{taskStatusLabelMap[task.status]}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  className="ventrix-btn-secondary h-7 px-2 text-[10px]"
+                                  onClick={() => handleToggleTaskStatus(task)}
+                                  disabled={updateLeadTaskStatusMutation.isPending}
+                                >
+                                  {task.status === "done" ? "Marcar pendiente" : "Marcar hecha"}
+                                </button>
+                                <button
+                                  type="button"
+                                  className="ventrix-btn-secondary h-7 px-2 text-[10px]"
+                                  onClick={() => handleOpenEditTaskDialog(task)}
+                                  disabled={updateLeadTaskMutation.isPending}
+                                >
+                                  Editar
+                                </button>
+                              </div>
+                            </div>
+                          ))
+                        : null}
+                    </div>
+
+                    <form onSubmit={handleCreateTask} className="space-y-2 mt-3">
+                      <p className="text-xs font-medium">Nueva tarea</p>
+                      <input
+                        className="ventrix-input h-8 text-xs"
+                        placeholder="Ej: Llamar para confirmar interes"
+                        value={createTaskForm.title}
+                        onChange={handleCreateTaskFieldChange("title")}
+                        disabled={createLeadTaskMutation.isPending}
+                        required
+                      />
+                      <input
+                        className="ventrix-input h-8 text-xs"
+                        type="datetime-local"
+                        value={createTaskForm.dueAt}
+                        onChange={handleCreateTaskFieldChange("dueAt")}
+                        disabled={createLeadTaskMutation.isPending}
+                      />
+                      <textarea
+                        className="ventrix-input min-h-16 text-xs py-2"
+                        placeholder="Descripcion opcional"
+                        value={createTaskForm.description}
+                        onChange={handleCreateTaskFieldChange("description")}
+                        disabled={createLeadTaskMutation.isPending}
+                      />
+                      <div className="flex items-center justify-between">
+                        {createLeadTaskMutation.isPending ? (
+                          <p className="text-[10px] text-muted-foreground">Guardando tarea...</p>
+                        ) : (
+                          <span />
+                        )}
+                        <button
+                          type="submit"
+                          className="ventrix-btn-secondary h-8 px-3 text-xs"
+                          disabled={createLeadTaskMutation.isPending || createTaskForm.title.trim().length === 0}
+                        >
+                          Crear tarea
+                        </button>
+                      </div>
+                    </form>
                   </div>
 
                   <div>
@@ -1085,6 +1417,74 @@ export default function Leads() {
               </button>
               <button type="submit" className="ventrix-btn-primary h-9 px-4 text-sm" disabled={updateLeadMutation.isPending}>
                 {updateLeadMutation.isPending ? "Guardando..." : "Guardar cambios"}
+              </button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={isEditTaskDialogOpen}
+        onOpenChange={(open) => {
+          setIsEditTaskDialogOpen(open);
+          if (!open) {
+            setEditingTaskId(null);
+            setEditTaskForm(EMPTY_TASK_FORM);
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar tarea</DialogTitle>
+            <DialogDescription>Actualiza los datos basicos de la tarea seleccionada.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleUpdateTask} className="space-y-4">
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Titulo *</label>
+                <input
+                  className="ventrix-input text-sm"
+                  value={editTaskForm.title}
+                  onChange={handleEditTaskFieldChange("title")}
+                  required
+                  disabled={updateLeadTaskMutation.isPending}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Vence</label>
+                <input
+                  className="ventrix-input text-sm"
+                  type="datetime-local"
+                  value={editTaskForm.dueAt}
+                  onChange={handleEditTaskFieldChange("dueAt")}
+                  disabled={updateLeadTaskMutation.isPending}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Descripcion</label>
+                <textarea
+                  className="ventrix-input min-h-20 text-sm py-2"
+                  value={editTaskForm.description}
+                  onChange={handleEditTaskFieldChange("description")}
+                  disabled={updateLeadTaskMutation.isPending}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <button
+                type="button"
+                className="ventrix-btn-secondary h-9 px-4 text-sm"
+                onClick={() => {
+                  setIsEditTaskDialogOpen(false);
+                  setEditingTaskId(null);
+                  setEditTaskForm(EMPTY_TASK_FORM);
+                }}
+                disabled={updateLeadTaskMutation.isPending}
+              >
+                Cancelar
+              </button>
+              <button type="submit" className="ventrix-btn-primary h-9 px-4 text-sm" disabled={updateLeadTaskMutation.isPending}>
+                {updateLeadTaskMutation.isPending ? "Guardando..." : "Guardar tarea"}
               </button>
             </DialogFooter>
           </form>

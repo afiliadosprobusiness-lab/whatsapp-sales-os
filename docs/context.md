@@ -77,6 +77,9 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
   - Lead detail panel with backend detail fetch (`GET /leads/:id`).
   - Lead activity timeline fetch from dedicated backend endpoint (`GET /leads/:id/activity`).
   - Manual note/activity creation from lead detail (`POST /leads/:id/activity`) with immediate refresh.
+  - Lead follow-up tasks listing from backend (`GET /leads/:id/tasks`) with explicit loading/error/empty handling.
+  - Lead follow-up task creation and basic editing (`POST /leads/:id/tasks`, `PATCH /tasks/:id`).
+  - Lead follow-up task status updates (`PATCH /tasks/:id/status`) with per-lead refresh after mutations.
   - Basic lead operations: create, edit, and status update against backend.
   - Explicit UI data states: `idle | loading | success | error | empty`.
 - Main screens/components:
@@ -85,6 +88,8 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
   - `src/types/leads.ts`
   - `src/services/lead-activity.service.ts`
   - `src/types/lead-activity.ts`
+  - `src/services/lead-tasks.service.ts`
+  - `src/types/lead-tasks.ts`
 - Inputs/outputs:
   - Input: lead attributes, filters, assignment, manual notes.
   - Output: prioritized lead set consumed by Conversations/Recovery/Campaigns/Deal Probability.
