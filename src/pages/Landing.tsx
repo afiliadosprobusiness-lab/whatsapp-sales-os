@@ -1,16 +1,20 @@
-﻿import { Link } from "react-router-dom";
+﻿import { useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
   Bot,
   CheckCircle2,
+  ChevronLeft,
   ChevronRight,
   Clock3,
+  Heart,
   LineChart,
   MapPinned,
+  MessageCircle,
   MessageSquare,
+  Send,
   ShieldCheck,
-  Sparkles,
   Target,
   TrendingUp,
   XCircle,
@@ -32,6 +36,8 @@ const testimonials = [
     company: "Moda Lima Store",
     city: "Lima, Perú",
     avatar: "/avatars/valeria.svg",
+    handle: "@maria_codshop",
+    likes: "1.2 mil",
     message:
       "Con WhatsSalesRecovery dejamos de perder chats en horas pico. Recuperamos ventas todos los días.",
   },
@@ -41,6 +47,8 @@ const testimonials = [
     company: "ElectroHogar PE",
     city: "Arequipa, Perú",
     avatar: "/avatars/diego.svg",
+    handle: "@dan_pedidos",
+    likes: "986",
     message:
       "Nuestro equipo duplicó el seguimiento efectivo y subió la tasa de cierre en menos de 30 días.",
   },
@@ -48,8 +56,10 @@ const testimonials = [
     name: "Andrea Ruiz",
     role: "COO",
     company: "Belleza Urbana",
-    city: "Bogota, Colombia",
+    city: "Bogotá, Colombia",
     avatar: "/avatars/andrea.svg",
+    handle: "@vale.store",
+    likes: "1.8 mil",
     message:
       "La vista de oportunidades en riesgo nos ayudó a priorizar mejor y vender con menos fricción.",
   },
@@ -57,8 +67,10 @@ const testimonials = [
     name: "Martin Salazar",
     role: "Founder",
     company: "MarketPro MX",
-    city: "CDMX, Mexico",
+    city: "CDMX, México",
     avatar: "/avatars/martin.svg",
+    handle: "@javi_cod",
+    likes: "764",
     message:
       "El sistema nos dio una operación más ordenada para LATAM, sin depender de hojas de cálculo.",
   },
@@ -68,15 +80,19 @@ const testimonials = [
     company: "CasaNova Home",
     city: "Trujillo, Perú",
     avatar: "/avatars/camila.svg",
+    handle: "@camila.home",
+    likes: "1.1 mil",
     message:
       "Las secuencias de recuperación se sienten naturales y el equipo responde con mejor contexto.",
   },
   {
-    name: "Jose Herrera",
+    name: "José Herrera",
     role: "Revenue Lead",
     company: "Urban Retail CL",
     city: "Santiago, Chile",
     avatar: "/avatars/jose.svg",
+    handle: "@jose_revenue",
+    likes: "842",
     message:
       "Pasamos de reaccionar tarde a anticiparnos con alertas claras y acciones concretas.",
   },
@@ -114,7 +130,7 @@ const features = [
   },
   {
     icon: Target,
-    title: "Priorizacion inteligente",
+    title: "Priorización inteligente",
     description: "Detecta prospectos con mayor probabilidad de cierre y acelera acciones.",
   },
 ];
@@ -145,6 +161,7 @@ const stats = [
 ];
 
 export default function Landing() {
+  const [marqueeDirection, setMarqueeDirection] = useState<"left" | "right">("left");
   const marqueeItems = [...testimonials, ...testimonials];
 
   return (
@@ -154,9 +171,12 @@ export default function Landing() {
       <nav className="fixed inset-x-0 top-0 z-50 border-b border-slate-800/70 bg-slate-950/75 backdrop-blur-xl">
         <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-6">
           <Link to="/" className="flex items-center gap-3">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-400 text-xs font-black text-slate-950">
-              W
-            </span>
+            <img
+              src="/favicon.svg"
+              alt="Logo de WhatsSalesRecovery"
+              className="h-8 w-8 rounded-lg object-cover ring-1 ring-emerald-300/40"
+              loading="eager"
+            />
             <span className="font-display text-base font-semibold tracking-tight">WhatsSalesRecovery</span>
           </Link>
           <div className="hidden items-center gap-8 text-sm text-slate-300 lg:flex">
@@ -325,14 +345,35 @@ export default function Landing() {
           </div>
         </section>
 
-        <section id="testimonios" className="px-6 pb-16">
+        <section id="testimonios" className="wsr-testimonial-grid px-6 pb-16">
           <div className="mx-auto max-w-7xl">
-            <div className="mb-8">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">Testimonios</p>
-                <h2 className="mt-2 font-display text-3xl font-bold text-white md:text-4xl">
-                  Historias reales de equipos en Perú y LATAM
-                </h2>
+            <div className="mb-8 rounded-3xl border border-cyan-400/20 bg-slate-900/35 p-6 backdrop-blur-sm">
+              <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">Testimonios</p>
+                  <h2 className="mt-2 font-display text-3xl font-bold text-white md:text-5xl">
+                    Historias reales de tiendas que venden más
+                  </h2>
+                  <p className="mt-2 text-sm text-slate-300">Desliza o usa las flechas para navegar</p>
+                </div>
+                <div className="hidden items-center gap-2 md:flex">
+                  <button
+                    type="button"
+                    onClick={() => setMarqueeDirection("right")}
+                    className="rounded-xl border border-slate-700 bg-slate-950/70 p-2.5 text-slate-200 transition-colors hover:border-cyan-300/70 hover:text-cyan-200"
+                    aria-label="Mover testimonios a la derecha"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMarqueeDirection("left")}
+                    className="rounded-xl border border-slate-700 bg-slate-950/70 p-2.5 text-slate-200 transition-colors hover:border-cyan-300/70 hover:text-cyan-200"
+                    aria-label="Mover testimonios a la izquierda"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -341,81 +382,89 @@ export default function Landing() {
                 {testimonials.map((item) => (
                   <article
                     key={`mobile-${item.name}`}
-                    className="w-[280px] shrink-0 snap-center rounded-2xl border border-slate-800 bg-slate-900/80 p-4"
+                    className="w-[300px] shrink-0 snap-center rounded-[24px] border border-slate-700/80 bg-slate-900/80 p-2 shadow-lg shadow-cyan-950/25"
                   >
-                    <div className="mb-3 flex items-center gap-3">
-                      <img
-                        src={item.avatar}
-                        alt={`Foto ficticia de ${item.name}`}
-                        className="h-11 w-11 rounded-full object-cover ring-2 ring-cyan-300/40"
-                        loading="lazy"
-                      />
-                      <div>
-                        <p className="text-sm font-semibold text-white">{item.name}</p>
-                        <p className="text-xs text-slate-400">
-                          {item.role} · {item.company}
-                        </p>
+                    <img
+                      src={item.avatar}
+                      alt={`Foto ficticia de ${item.name}`}
+                      className="h-48 w-full rounded-[18px] object-cover"
+                      loading="lazy"
+                    />
+                    <div className="mt-2 rounded-[18px] border border-slate-800 bg-slate-950/80 p-4">
+                      <div className="mb-3 flex items-center gap-3">
+                        <img
+                          src={item.avatar}
+                          alt={`Avatar de ${item.name}`}
+                          className="h-10 w-10 rounded-full object-cover ring-2 ring-cyan-300/40"
+                          loading="lazy"
+                        />
+                        <div>
+                          <p className="text-sm font-semibold text-white">{item.name}</p>
+                          <p className="text-xs text-cyan-300">
+                            {item.role} · {item.company}
+                          </p>
+                          <p className="text-xs text-slate-400">{item.handle}</p>
+                        </div>
                       </div>
+                      <p className="text-sm leading-relaxed text-slate-300">{item.message}</p>
+                      <div className="mt-4 flex items-center justify-between text-slate-400">
+                        <p className="inline-flex items-center gap-1.5 text-xs text-rose-300">
+                          <Heart className="h-3.5 w-3.5" />
+                          {item.likes}
+                        </p>
+                        <div className="inline-flex items-center gap-2">
+                          <MessageCircle className="h-3.5 w-3.5" />
+                          <Send className="h-3.5 w-3.5" />
+                        </div>
+                      </div>
+                      <p className="mt-2 text-xs text-cyan-300">{item.city}</p>
                     </div>
-                    <p className="text-sm leading-relaxed text-slate-300">{item.message}</p>
-                    <p className="mt-3 text-xs font-medium text-cyan-300">{item.city}</p>
                   </article>
                 ))}
               </div>
             </div>
 
             <div className="hidden md:block wsr-marquee-mask overflow-hidden py-2">
-              <div className="wsr-marquee-track">
+              <div className={`wsr-marquee-track ${marqueeDirection === "right" ? "wsr-marquee-reverse" : ""}`}>
                 {marqueeItems.map((item, index) => (
                   <article
                     key={`${item.name}-${index}`}
-                    className="min-w-[300px] max-w-[300px] rounded-2xl border border-slate-800 bg-slate-900/70 p-4"
+                    className="group min-w-[330px] max-w-[330px] rounded-[24px] border border-slate-700/80 bg-slate-900/80 p-2 shadow-xl shadow-cyan-950/20 transition-transform hover:-translate-y-1"
                   >
-                    <div className="mb-3 flex items-center gap-3">
-                      <img
-                        src={item.avatar}
-                        alt={`Foto ficticia de ${item.name}`}
-                        className="h-11 w-11 rounded-full object-cover ring-2 ring-cyan-300/40"
-                        loading="lazy"
-                      />
-                      <div>
-                        <p className="text-sm font-semibold text-white">{item.name}</p>
-                        <p className="text-xs text-slate-400">
-                          {item.role} · {item.company}
+                    <img
+                      src={item.avatar}
+                      alt={`Foto ficticia de ${item.name}`}
+                      className="h-56 w-full rounded-[18px] object-cover"
+                      loading="lazy"
+                    />
+                    <div className="mt-2 rounded-[18px] border border-slate-800 bg-slate-950/80 p-4">
+                      <div className="mb-3 flex items-center gap-3">
+                        <img
+                          src={item.avatar}
+                          alt={`Avatar de ${item.name}`}
+                          className="h-10 w-10 rounded-full object-cover ring-2 ring-cyan-300/40"
+                          loading="lazy"
+                        />
+                        <div>
+                          <p className="text-sm font-semibold text-white">{item.name}</p>
+                          <p className="text-xs text-cyan-300">
+                            {item.role} · {item.company}
+                          </p>
+                          <p className="text-xs text-slate-400">{item.handle}</p>
+                        </div>
+                      </div>
+                      <p className="text-sm leading-relaxed text-slate-300">{item.message}</p>
+                      <div className="mt-4 flex items-center justify-between text-slate-400">
+                        <p className="inline-flex items-center gap-1.5 text-xs text-rose-300">
+                          <Heart className="h-3.5 w-3.5" />
+                          {item.likes}
                         </p>
+                        <div className="inline-flex items-center gap-2">
+                          <MessageCircle className="h-3.5 w-3.5" />
+                          <Send className="h-3.5 w-3.5" />
+                        </div>
                       </div>
-                    </div>
-                    <p className="text-sm leading-relaxed text-slate-300">{item.message}</p>
-                    <p className="mt-3 text-xs font-medium text-cyan-300">{item.city}</p>
-                  </article>
-                ))}
-              </div>
-            </div>
-
-            <div className="hidden md:block wsr-marquee-mask mt-4 overflow-hidden py-2">
-              <div className="wsr-marquee-track wsr-marquee-reverse">
-                {marqueeItems.map((item, index) => (
-                  <article
-                    key={`reverse-${item.name}-${index}`}
-                    className="min-w-[300px] max-w-[300px] rounded-2xl border border-slate-800 bg-slate-900/70 p-4"
-                  >
-                    <div className="flex items-start gap-3">
-                      <img
-                        src={item.avatar}
-                        alt={`Foto ficticia de ${item.name}`}
-                        className="h-10 w-10 rounded-full object-cover ring-2 ring-emerald-300/40"
-                        loading="lazy"
-                      />
-                      <div className="flex-1">
-                        <p className="text-sm leading-relaxed text-slate-300">"{item.message}"</p>
-                      </div>
-                    </div>
-                    <div className="mt-4 flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-semibold text-white">{item.name}</p>
-                        <p className="text-xs text-slate-400">{item.role}</p>
-                      </div>
-                      <Sparkles className="h-4 w-4 text-emerald-300" />
+                      <p className="mt-2 text-xs text-cyan-300">{item.city}</p>
                     </div>
                   </article>
                 ))}
@@ -539,4 +588,3 @@ export default function Landing() {
     </div>
   );
 }
-

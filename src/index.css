@@ -201,6 +201,14 @@
     @apply py-20 px-6;
   }
 
+  .wsr-testimonial-grid {
+    background-image:
+      linear-gradient(to right, hsl(210 40% 60% / 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(210 40% 60% / 0.08) 1px, transparent 1px);
+    background-size: 36px 36px;
+    border-radius: 1.5rem;
+  }
+
   .wsr-marquee-mask {
     mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
     -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
