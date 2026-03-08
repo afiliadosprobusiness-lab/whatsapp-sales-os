@@ -7,19 +7,17 @@ export interface WorkspaceBranding {
 export interface Workspace {
   id: string;
   name: string;
-  industry?: string;
+  businessName?: string;
   country?: string;
   timezone?: string;
-  description?: string;
   branding?: WorkspaceBranding;
 }
 
 export interface UpdateWorkspaceRequest {
   name: string;
-  industry?: string;
+  businessName?: string;
   country?: string;
   timezone?: string;
-  description?: string;
 }
 
 interface WorkspaceApiErrorPayload {
@@ -155,10 +153,9 @@ const normalizeWorkspace = (value: unknown): Workspace => {
   return {
     id: asString(value.id) ?? asString(value.workspaceId) ?? name.toLowerCase().replace(/\s+/g, "-"),
     name,
-    industry: asString(value.industry),
+    businessName: asString(value.businessName),
     country: asString(value.country),
     timezone: asString(value.timezone),
-    description: asString(value.description),
     branding,
   };
 };
@@ -187,13 +184,24 @@ const normalizeUpdatePayload = (payload: UpdateWorkspaceRequest) => {
     });
   }
 
-  return {
+  const normalizedBusinessName = payload.businessName?.trim() ?? normalizedName;
+  const normalizedCountry = payload.country?.trim();
+  const normalizedTimezone = payload.timezone?.trim();
+
+  const updatePayload: Record<string, string> = {
     name: normalizedName,
-    industry: payload.industry?.trim() ?? "",
-    country: payload.country?.trim() ?? "",
-    timezone: payload.timezone?.trim() ?? "",
-    description: payload.description?.trim() ?? "",
+    businessName: normalizedBusinessName,
   };
+
+  if (normalizedCountry && normalizedCountry.length >= 2) {
+    updatePayload.country = normalizedCountry;
+  }
+
+  if (normalizedTimezone && normalizedTimezone.length >= 1) {
+    updatePayload.timezone = normalizedTimezone;
+  }
+
+  return updatePayload;
 };
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {

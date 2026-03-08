@@ -35,37 +35,36 @@ const integrations = [
   { name: "Meta Ads", status: "Disponible", desc: "Importa leads de campanas" },
 ];
 
-const industryOptions = ["E-commerce", "Servicios", "Retail"] as const;
-const countryOptions = ["Mexico", "Colombia", "Chile", "Argentina"] as const;
+const countryOptions = [
+  { value: "PE", label: "Peru" },
+  { value: "MX", label: "Mexico" },
+  { value: "CO", label: "Colombia" },
+  { value: "CL", label: "Chile" },
+  { value: "AR", label: "Argentina" },
+] as const;
 const timezoneOptions = [
-  "America/Mexico_City (UTC-6)",
-  "America/Bogota (UTC-5)",
-  "America/Lima (UTC-5)",
-  "America/Santiago (UTC-4)",
+  { value: "America/Mexico_City", label: "America/Mexico_City (UTC-6)" },
+  { value: "America/Bogota", label: "America/Bogota (UTC-5)" },
+  { value: "America/Lima", label: "America/Lima (UTC-5)" },
+  { value: "America/Santiago", label: "America/Santiago (UTC-4)" },
 ] as const;
 
 interface WorkspaceProfileFormState {
-  name: string;
-  industry: string;
+  businessName: string;
   country: string;
   timezone: string;
-  description: string;
 }
 
 const EMPTY_PROFILE_FORM: WorkspaceProfileFormState = {
-  name: "",
-  industry: "",
+  businessName: "",
   country: "",
   timezone: "",
-  description: "",
 };
 
 const toProfileFormState = (workspace: Workspace): WorkspaceProfileFormState => ({
-  name: workspace.name ?? "",
-  industry: workspace.industry ?? "",
+  businessName: workspace.businessName ?? workspace.name ?? "",
   country: workspace.country ?? "",
   timezone: workspace.timezone ?? "",
-  description: workspace.description ?? "",
 });
 
 const withCurrentOption = (value: string, options: readonly string[]) => {
@@ -75,6 +74,9 @@ const withCurrentOption = (value: string, options: readonly string[]) => {
 
   return options.includes(value) ? options : [value, ...options];
 };
+
+const countryLabelByValue = new Map(countryOptions.map((option) => [option.value, option.label]));
+const timezoneLabelByValue = new Map(timezoneOptions.map((option) => [option.value, option.label]));
 
 export default function Settings() {
   const queryClient = useQueryClient();
@@ -105,18 +107,13 @@ export default function Settings() {
     setProfileForm(toProfileFormState(workspaceQuery.data));
   }, [workspaceQuery.data]);
 
-  const industrySelectOptions = useMemo(
-    () => withCurrentOption(profileForm.industry, industryOptions),
-    [profileForm.industry],
-  );
-
   const countrySelectOptions = useMemo(
-    () => withCurrentOption(profileForm.country, countryOptions),
+    () => withCurrentOption(profileForm.country, countryOptions.map((option) => option.value)),
     [profileForm.country],
   );
 
   const timezoneSelectOptions = useMemo(
-    () => withCurrentOption(profileForm.timezone, timezoneOptions),
+    () => withCurrentOption(profileForm.timezone, timezoneOptions.map((option) => option.value)),
     [profileForm.timezone],
   );
 
@@ -134,18 +131,17 @@ export default function Settings() {
       return;
     }
 
-    const normalizedName = profileForm.name.trim();
-    if (normalizedName.length === 0) {
+    const normalizedBusinessName = profileForm.businessName.trim();
+    if (normalizedBusinessName.length === 0) {
       toast.error("El nombre del negocio es obligatorio.");
       return;
     }
 
     saveWorkspaceMutation.mutate({
-      name: normalizedName,
-      industry: profileForm.industry,
+      name: normalizedBusinessName,
+      businessName: normalizedBusinessName,
       country: profileForm.country,
       timezone: profileForm.timezone,
-      description: profileForm.description,
     });
   };
 
@@ -236,25 +232,10 @@ export default function Settings() {
                     <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Nombre del negocio</label>
                     <input
                       className="ventrix-input text-sm"
-                      value={profileForm.name}
-                      onChange={handleProfileFieldChange("name")}
+                      value={profileForm.businessName}
+                      onChange={handleProfileFieldChange("businessName")}
                       required
                     />
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Industria</label>
-                    <select
-                      className="ventrix-input text-sm"
-                      value={profileForm.industry}
-                      onChange={handleProfileFieldChange("industry")}
-                    >
-                      <option value="">Seleccionar industria</option>
-                      {industrySelectOptions.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
                   </div>
                   <div>
                     <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Pais</label>
@@ -266,7 +247,7 @@ export default function Settings() {
                       <option value="">Seleccionar pais</option>
                       {countrySelectOptions.map((option) => (
                         <option key={option} value={option}>
-                          {option}
+                          {countryLabelByValue.get(option) ?? option}
                         </option>
                       ))}
                     </select>
@@ -281,18 +262,10 @@ export default function Settings() {
                       <option value="">Seleccionar zona horaria</option>
                       {timezoneSelectOptions.map((option) => (
                         <option key={option} value={option}>
-                          {option}
+                          {timezoneLabelByValue.get(option) ?? option}
                         </option>
                       ))}
                     </select>
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Descripcion</label>
-                    <textarea
-                      className="ventrix-input h-20 py-2 resize-none text-sm"
-                      value={profileForm.description}
-                      onChange={handleProfileFieldChange("description")}
-                    />
                   </div>
                 </div>
                 <div className="flex justify-end">
