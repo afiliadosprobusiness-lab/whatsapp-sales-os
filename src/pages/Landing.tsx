@@ -19,6 +19,7 @@ import {
   TrendingUp,
   XCircle,
 } from "lucide-react";
+import { BrandLogo } from "@/components/BrandLogo";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -170,14 +171,8 @@ export default function Landing() {
 
       <nav className="fixed inset-x-0 top-0 z-50 border-b border-slate-800/70 bg-slate-950/75 backdrop-blur-xl">
         <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-6">
-          <Link to="/" className="flex items-center gap-3">
-            <img
-              src="/favicon.svg"
-              alt="Logo de WhatsSalesRecovery"
-              className="h-8 w-8 rounded-lg object-cover ring-1 ring-emerald-300/40"
-              loading="eager"
-            />
-            <span className="font-display text-base font-semibold tracking-tight">WhatsSalesRecovery</span>
+          <Link to="/" className="flex items-center">
+            <BrandLogo size="sm" />
           </Link>
           <div className="hidden items-center gap-8 text-sm text-slate-300 lg:flex">
             <a href="#hero" className="transition-colors hover:text-emerald-300">

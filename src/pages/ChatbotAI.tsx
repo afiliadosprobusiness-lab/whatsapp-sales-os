@@ -57,7 +57,7 @@ export default function ChatbotAI() {
               <div className="space-y-4">
                 <div>
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Nombre del asistente</label>
-                  <input className="ventrix-input text-sm" defaultValue="Vendedor IA Ventrix" />
+                  <input className="ventrix-input text-sm" defaultValue="Vendedor IA WhatsSalesRecovery" />
                 </div>
                 <div>
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Objetivo comercial</label>

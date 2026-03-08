@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { Zap, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export default function Login() {
   const [showPass, setShowPass] = useState(false);
@@ -13,17 +14,12 @@ export default function Login() {
           backgroundImage: "radial-gradient(circle at 30% 50%, hsl(160 84% 29% / 0.2) 0%, transparent 50%)"
         }} />
         <div className="relative z-10 max-w-md">
-          <div className="flex items-center gap-2 mb-8">
-            <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center">
-              <Zap className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="font-display font-bold text-xl" style={{color:"hsl(0 0% 95%)"}}>Ventrix</span>
-          </div>
+          <BrandLogo className="mb-8" />
           <h2 className="font-display text-3xl font-bold mb-4" style={{color:"hsl(0 0% 95%)"}}>
             Recupera ventas que creías perdidas
           </h2>
           <p className="text-base mb-10" style={{color:"hsl(220 10% 60%)"}}>
-            Más de 2,400 negocios en LATAM usan Ventrix para organizar sus ventas por WhatsApp y aumentar sus cierres.
+            Más de 2,400 negocios en LATAM usan WhatsSalesRecovery para organizar sus ventas por WhatsApp y aumentar sus cierres.
           </p>
           <div className="space-y-4">
             {[
@@ -46,15 +42,15 @@ export default function Login() {
       {/* Right panel */}
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-sm">
-          <div className="lg:hidden flex items-center gap-2 mb-8">
-            <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-              <Zap className="w-4 h-4 text-primary-foreground" />
-            </div>
-            <span className="font-display font-bold text-lg">Ventrix</span>
-          </div>
+          <BrandLogo size="sm" className="mb-8 lg:hidden" />
 
           <h1 className="font-display text-2xl font-bold mb-1">Bienvenido de vuelta</h1>
           <p className="text-sm text-muted-foreground mb-8">Ingresa tus credenciales para acceder a tu cuenta</p>
+          <div className="mb-6 rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs">
+            <p className="font-semibold text-foreground">Credenciales de prueba</p>
+            <p className="mt-1 text-muted-foreground">Usuario: demo@whatssalesrecovery.com</p>
+            <p className="text-muted-foreground">Password: Demo123456!</p>
+          </div>
 
           <div className="space-y-4">
             <div>
@@ -105,3 +101,4 @@ export default function Login() {
     </div>
   );
 }
+

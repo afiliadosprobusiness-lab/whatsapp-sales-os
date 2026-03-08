@@ -4,7 +4,7 @@
 This file defines bounded contexts inferred from the current UI implementation and route structure. It is intended to help future agents implement backend/state logic without breaking the current screen model.
 
 ## 2) Global product intent (as represented in UI)
-Ventrix is presented as a WhatsApp sales operating system for LATAM businesses focused on:
+WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM businesses focused on:
 - lead organization,
 - conversational selling,
 - recovery of abandoned opportunities,

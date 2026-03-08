@@ -2,8 +2,9 @@ import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Users, MessageSquare, Bot, RefreshCw,
   Upload, Megaphone, Target, Lightbulb, TrendingUp, BarChart3,
-  Settings, Zap
+  Settings
 } from "lucide-react";
+import { BrandLogo } from "@/components/BrandLogo";
 
 const navItems = [
   { label: "Overview", icon: LayoutDashboard, path: "/dashboard" },
@@ -51,11 +52,8 @@ export function AppSidebar() {
   return (
     <aside className="w-60 bg-sidebar flex flex-col border-r border-sidebar-border flex-shrink-0">
       {/* Logo */}
-      <div className="h-14 flex items-center gap-2.5 px-5 border-b border-sidebar-border">
-        <div className="w-7 h-7 rounded-lg bg-sidebar-primary flex items-center justify-center">
-          <Zap className="w-4 h-4 text-sidebar-primary-foreground" />
-        </div>
-        <span className="font-display font-bold text-base text-sidebar-accent-foreground tracking-tight">Ventrix</span>
+      <div className="h-14 flex items-center px-4 border-b border-sidebar-border">
+        <BrandLogo size="sm" />
       </div>
 
       {/* Navigation */}

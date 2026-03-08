@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { Zap, Eye, EyeOff, CheckCircle2 } from "lucide-react";
+import { Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export default function Register() {
   const [showPass, setShowPass] = useState(false);
@@ -13,12 +14,7 @@ export default function Register() {
           backgroundImage: "radial-gradient(circle at 50% 50%, hsl(160 84% 29% / 0.2) 0%, transparent 50%)"
         }} />
         <div className="relative z-10 max-w-md">
-          <div className="flex items-center gap-2 mb-8">
-            <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center">
-              <Zap className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="font-display font-bold text-xl" style={{color:"hsl(0 0% 95%)"}}>Ventrix</span>
-          </div>
+          <BrandLogo className="mb-8" />
           <h2 className="font-display text-3xl font-bold mb-4" style={{color:"hsl(0 0% 95%)"}}>
             Empieza a vender más hoy
           </h2>
@@ -44,12 +40,7 @@ export default function Register() {
       {/* Right */}
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-sm">
-          <div className="lg:hidden flex items-center gap-2 mb-8">
-            <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-              <Zap className="w-4 h-4 text-primary-foreground" />
-            </div>
-            <span className="font-display font-bold text-lg">Ventrix</span>
-          </div>
+          <BrandLogo size="sm" className="mb-8 lg:hidden" />
 
           <h1 className="font-display text-2xl font-bold mb-1">Crear cuenta</h1>
           <p className="text-sm text-muted-foreground mb-8">Comienza a recuperar ventas perdidas hoy</p>
