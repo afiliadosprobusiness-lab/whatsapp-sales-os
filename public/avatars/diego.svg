@@ -1,11 +1,19 @@
-﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none">
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
   <defs>
-    <linearGradient id="bg" x1="8" y1="12" x2="88" y2="84" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#38BDF8"/>
-      <stop offset="1" stop-color="#22C55E"/>
+    <linearGradient id="bg" x1="8" y1="10" x2="112" y2="112" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0EA5E9"/>
+      <stop offset="1" stop-color="#16A34A"/>
     </linearGradient>
   </defs>
-  <rect width="96" height="96" rx="24" fill="url(#bg)"/>
-  <circle cx="48" cy="34" r="15" fill="#E2E8F0"/>
-  <path d="M20 84c5-13 16-20 28-20 14 0 24 7 28 20" fill="#E2E8F0"/>
+  <rect width="120" height="120" rx="28" fill="url(#bg)"/>
+  <ellipse cx="60" cy="122" rx="40" ry="28" fill="#0F172A" fill-opacity="0.35"/>
+  <path d="M30 108c4-17 17-27 30-27s25 10 30 27" fill="#BFDBFE"/>
+  <rect x="46" y="80" width="28" height="14" rx="7" fill="#FCD7B6"/>
+  <ellipse cx="60" cy="58" rx="22" ry="24" fill="#FCD7B6"/>
+  <path d="M39 56c0-17 8-29 21-29s21 12 21 29c-4-4-9-7-21-7s-17 3-21 7z" fill="#1E293B"/>
+  <rect x="40" y="47" width="40" height="10" rx="5" fill="#1E293B"/>
+  <circle cx="52" cy="59" r="2.2" fill="#111827"/>
+  <circle cx="68" cy="59" r="2.2" fill="#111827"/>
+  <path d="M55 68c2 2 8 2 10 0" stroke="#9A3412" stroke-width="2" stroke-linecap="round"/>
+  <path d="M34 108c3-13 13-22 26-22 13 0 23 9 26 22" fill="#1D4ED8"/>
 </svg>
