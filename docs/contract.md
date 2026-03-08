@@ -10,6 +10,7 @@ Current status in codebase:
 - Auth module is integrated to production API with cookie session.
 - Settings business profile now uses real workspace API (`GET /workspace/me`, `PATCH /workspace/me`).
 - Leads module now uses real backend API (`GET /leads`, `POST /leads`, `GET /leads/:id`, `PATCH /leads/:id`, `PATCH /leads/:id/status`).
+- Lead activity inside lead detail now uses real backend API (`GET /leads/:id/activity`, `POST /leads/:id/activity`) for historial and manual notes.
 - `@tanstack/react-query` is configured globally and is now used by Settings business profile integration.
 
 Routes implemented:
@@ -299,6 +300,8 @@ Contract:
 - `POST /leads`
 - `PATCH /leads/:leadId`
 - `PATCH /leads/:leadId/status`
+- `GET /leads/:leadId/activity`
+- `POST /leads/:leadId/activity`
 
 ### 8.4 Conversations
 UI evidence:
@@ -448,3 +451,4 @@ Contract:
 | 2026-03-08 | Auth contract aligned to real backend usage (`/auth/register`, `/auth/login`, `/auth/logout`, `/auth/me`) with `{data,error}` envelope and cookie session transport rules. | non-breaking | Frontend auth now depends on backend cookie session and backend error envelope parsing. |
 | 2026-03-08 | Workspace settings contract aligned to real backend usage (`/workspace/me` GET/PATCH) for business profile load/save in Settings. | non-breaking | Settings business profile no longer depends on local mocks and now persists against backend workspace scope. |
 | 2026-03-08 | Leads contract aligned to real backend usage (`/leads` GET/POST, `/leads/:id` GET/PATCH, `/leads/:id/status` PATCH) with shared `{data,error}` envelope handling. | non-breaking | Leads list/detail/create/edit/status now persist to backend in authenticated workspace scope. |
+| 2026-03-08 | Lead activity contract connected in lead detail (`/leads/:id/activity` GET/POST) including manual note creation and refresh flow. | non-breaking | Lead detail activity feed now reads/writes against backend instead of relying on embedded lead timeline payloads only. |

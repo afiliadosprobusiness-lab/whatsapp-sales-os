@@ -28,13 +28,17 @@
 
 ## Current Leads Architecture
 - `src/services/leads.service.ts` handles lead requests with `fetch` + `credentials: "include"` and `{data,error}` envelope parsing.
+- `src/services/lead-activity.service.ts` handles lead activity requests with the same transport/error strategy.
 - Leads screen (`src/pages/Leads.tsx`) is connected to:
   - `GET /leads` for list and pipeline.
   - `GET /leads/:id` for detail panel.
   - `POST /leads` for lead creation.
   - `PATCH /leads/:id` for lead editing.
   - `PATCH /leads/:id/status` for fast status changes.
+  - `GET /leads/:id/activity` for per-lead activity history.
+  - `POST /leads/:id/activity` for manual note/activity creation.
 - Leads query keys are centralized in `leadsQueryKeys` for list/detail cache invalidation.
+- Lead activity query keys are centralized in `leadActivityQueryKeys` for per-lead refresh after create.
 - Leads UX now handles `idle | loading | success | error | empty` states end-to-end.
 
 ## Route Access Model

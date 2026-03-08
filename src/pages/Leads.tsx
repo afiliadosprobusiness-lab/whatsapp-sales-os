@@ -9,7 +9,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/sonner";
+import leadActivityService, {
+  leadActivityQueryKeys,
+  leadActivityServiceErrors,
+} from "@/services/lead-activity.service";
 import leadsService, { leadsQueryKeys, leadsServiceErrors } from "@/services/leads.service";
+import type { LeadActivity } from "@/types/lead-activity";
 import type {
   CreateLeadRequest,
   GetLeadsParams,
@@ -217,6 +222,7 @@ export default function Leads() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [createForm, setCreateForm] = useState<LeadFormState>(EMPTY_LEAD_FORM);
   const [editForm, setEditForm] = useState<LeadFormState>(EMPTY_LEAD_FORM);
+  const [activityNoteDraft, setActivityNoteDraft] = useState("");
 
   useEffect(() => {
     setIsListEnabled(true);
@@ -241,6 +247,12 @@ export default function Leads() {
   const selectedLeadQuery = useQuery({
     queryKey: selectedLeadId ? leadsQueryKeys.detail(selectedLeadId) : leadsQueryKeys.detail("idle"),
     queryFn: () => leadsService.getById(selectedLeadId as string),
+    enabled: Boolean(selectedLeadId),
+    retry: false,
+  });
+  const leadActivityQuery = useQuery({
+    queryKey: selectedLeadId ? leadActivityQueryKeys.list(selectedLeadId) : leadActivityQueryKeys.list("idle"),
+    queryFn: () => leadActivityService.list(selectedLeadId as string),
     enabled: Boolean(selectedLeadId),
     retry: false,
   });
@@ -308,6 +320,23 @@ export default function Leads() {
       toast.error(leadsServiceErrors.getMessage(error, "No pudimos cambiar el estado del lead."));
     },
   });
+  const createLeadActivityMutation = useMutation({
+    mutationFn: ({ leadId, note }: { leadId: string; note: string }) =>
+      leadActivityService.create(leadId, {
+        type: "NOTE",
+        note,
+      }),
+    onSuccess: (_, variables) => {
+      setActivityNoteDraft("");
+      toast.success("Actividad registrada.");
+      void queryClient.invalidateQueries({
+        queryKey: leadActivityQueryKeys.list(variables.leadId),
+      });
+    },
+    onError: (error) => {
+      toast.error(leadActivityServiceErrors.getMessage(error, "No pudimos registrar la actividad."));
+    },
+  });
 
   const allLeads = leadsQuery.data ?? [];
   const selectedLeadSummary = selectedLeadId ? allLeads.find((lead) => lead.id === selectedLeadId) ?? null : null;
@@ -320,6 +349,10 @@ export default function Leads() {
 
     setStatusDraft(selectedLead.status);
   }, [selectedLead?.id, selectedLead?.status]);
+
+  useEffect(() => {
+    setActivityNoteDraft("");
+  }, [selectedLeadId]);
 
   const visibleLeads = useMemo(() => {
     const search = normalizedSearchTerm.toLowerCase();
@@ -373,6 +406,17 @@ export default function Leads() {
           ? "success"
           : "empty";
 
+  const activityItems: LeadActivity[] = leadActivityQuery.data ?? [];
+  const activityState: LeadsViewState = !selectedLeadId
+    ? "idle"
+    : leadActivityQuery.isLoading
+      ? "loading"
+      : leadActivityQuery.isError
+        ? "error"
+        : activityItems.length === 0
+          ? "empty"
+          : "success";
+
   const handleCreateFieldChange =
     (field: keyof LeadFormState) =>
     (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -422,6 +466,21 @@ export default function Leads() {
       leadId: selectedLeadId,
       status: statusDraft,
     });
+  };
+
+  const handleCreateActivity = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!selectedLeadId) {
+      return;
+    }
+
+    const note = activityNoteDraft.trim();
+    if (!note) {
+      return;
+    }
+
+    createLeadActivityMutation.mutate({ leadId: selectedLeadId, note });
   };
 
   return (
@@ -698,26 +757,96 @@ export default function Leads() {
                   </div>
 
                   <div>
-                    <p className="text-xs font-medium mb-2">Timeline</p>
+                    <div className="mb-2 flex items-center justify-between">
+                      <p className="text-xs font-medium">Actividad</p>
+                      <button
+                        type="button"
+                        className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                        onClick={() => {
+                          void leadActivityQuery.refetch();
+                        }}
+                        disabled={leadActivityQuery.isFetching}
+                      >
+                        {leadActivityQuery.isFetching ? "Actualizando..." : "Refrescar"}
+                      </button>
+                    </div>
                     <div className="space-y-2">
-                      {selectedLead.timeline.length === 0 ? (
+                      {activityState === "loading" ? (
+                        <div className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground flex items-center gap-2">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          Cargando actividad...
+                        </div>
+                      ) : null}
+
+                      {activityState === "error" ? (
+                        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-xs" role="alert">
+                          <p className="font-medium text-destructive">No pudimos cargar la actividad.</p>
+                          <p className="mt-1 text-muted-foreground">
+                            {leadActivityServiceErrors.getMessage(
+                              leadActivityQuery.error,
+                              "Ocurrio un error inesperado con el historial.",
+                            )}
+                          </p>
+                          <button
+                            type="button"
+                            className="mt-2 ventrix-btn-secondary h-7 px-2 text-[10px]"
+                            onClick={() => {
+                              void leadActivityQuery.refetch();
+                            }}
+                          >
+                            Reintentar
+                          </button>
+                        </div>
+                      ) : null}
+
+                      {activityState === "empty" ? (
                         <div className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">Sin actividad registrada.</div>
-                      ) : (
-                        selectedLead.timeline.map((timelineItem, index) => (
-                          <div key={timelineItem.id} className="flex gap-2 text-xs">
-                            <div className="flex flex-col items-center">
-                              <div className="w-2 h-2 rounded-full bg-primary mt-1" />
-                              {index < selectedLead.timeline.length - 1 ? <div className="w-px flex-1 bg-border mt-1" /> : null}
+                      ) : null}
+
+                      {activityState === "success"
+                        ? activityItems.map((activityItem, index) => (
+                            <div key={activityItem.id} className="flex gap-2 text-xs">
+                              <div className="flex flex-col items-center">
+                                <div className="w-2 h-2 rounded-full bg-primary mt-1" />
+                                {index < activityItems.length - 1 ? <div className="w-px flex-1 bg-border mt-1" /> : null}
+                              </div>
+                              <div className="pb-2">
+                                <p>{activityItem.text}</p>
+                                <p className="text-muted-foreground">
+                                  {toRelativeTime(activityItem.createdAt)}
+                                  {activityItem.createdByName ? ` · ${activityItem.createdByName}` : ""}
+                                </p>
+                              </div>
                             </div>
-                            <div className="pb-2">
-                              <p>{timelineItem.text}</p>
-                              <p className="text-muted-foreground">{toRelativeTime(timelineItem.timestamp)}</p>
-                            </div>
-                          </div>
-                        ))
-                      )}
+                          ))
+                        : null}
                     </div>
                   </div>
+
+                  <form onSubmit={handleCreateActivity} className="space-y-2">
+                    <p className="text-xs font-medium">Agregar nota</p>
+                    <textarea
+                      className="ventrix-input min-h-20 text-sm py-2"
+                      placeholder="Escribe una nota manual para este lead..."
+                      value={activityNoteDraft}
+                      onChange={(event) => setActivityNoteDraft(event.target.value)}
+                      disabled={createLeadActivityMutation.isPending}
+                    />
+                    <div className="flex items-center justify-between">
+                      {createLeadActivityMutation.isPending ? (
+                        <p className="text-[10px] text-muted-foreground">Guardando actividad...</p>
+                      ) : (
+                        <span />
+                      )}
+                      <button
+                        type="submit"
+                        className="ventrix-btn-secondary h-8 px-3 text-xs"
+                        disabled={createLeadActivityMutation.isPending || activityNoteDraft.trim().length === 0}
+                      >
+                        Guardar nota
+                      </button>
+                    </div>
+                  </form>
 
                   <div>
                     <p className="text-xs font-medium mb-2">Notas</p>
