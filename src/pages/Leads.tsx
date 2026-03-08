@@ -32,6 +32,7 @@ import type {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, Filter, Loader2, Mail, MessageSquare, MoreHorizontal, Phone, Plus, Search, X } from "lucide-react";
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 const statusLabelMap: Record<LeadStatus, string> = {
   NEW: "Nuevo",
@@ -283,6 +284,7 @@ const toTaskUpdatePayload = (form: LeadTaskFormState): UpdateLeadTaskRequest => 
 
 export default function Leads() {
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
   const [isListEnabled, setIsListEnabled] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [quickFilter, setQuickFilter] = useState<QuickFilter>("ALL");
@@ -297,10 +299,19 @@ export default function Leads() {
   const [editTaskForm, setEditTaskForm] = useState<LeadTaskFormState>(EMPTY_TASK_FORM);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [isEditTaskDialogOpen, setIsEditTaskDialogOpen] = useState(false);
+  const leadIdFromQuery = searchParams.get("leadId")?.trim() || null;
 
   useEffect(() => {
     setIsListEnabled(true);
   }, []);
+
+  useEffect(() => {
+    if (!leadIdFromQuery) {
+      return;
+    }
+
+    setSelectedLeadId((current) => current ?? leadIdFromQuery);
+  }, [leadIdFromQuery]);
 
   const normalizedSearchTerm = searchTerm.trim();
 

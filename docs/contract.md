@@ -12,6 +12,7 @@ Current status in codebase:
 - Leads module now uses real backend API (`GET /leads`, `POST /leads`, `GET /leads/:id`, `PATCH /leads/:id`, `PATCH /leads/:id/status`).
 - Lead activity inside lead detail now uses real backend API (`GET /leads/:id/activity`, `POST /leads/:id/activity`) for historial and manual notes.
 - Lead follow-up tasks inside lead detail now use real backend API (`GET /leads/:id/tasks`, `POST /leads/:id/tasks`, `PATCH /tasks/:id`, `PATCH /tasks/:id/status`) for reminders CRUD basico y estado.
+- Global tasks inbox now uses real backend API (`GET /tasks`) with optional summary (`GET /tasks/summary`) and optional quick status update (`PATCH /tasks/:id/status`).
 - `@tanstack/react-query` is configured globally and is now used by Settings business profile integration.
 
 Routes implemented:
@@ -20,6 +21,7 @@ Routes implemented:
 - `/register` Register
 - `/dashboard` Overview
 - `/leads`
+- `/tasks`
 - `/conversations`
 - `/chatbot`
 - `/recovery`
@@ -39,6 +41,7 @@ Routes implemented:
 | Auth | `/login`, `/register` | Two-panel auth layout, credential forms, social auth button |
 | Dashboard Overview | `/dashboard` | KPI metric cards, mock chart, insights cards, leads table, activity feed, alert widgets |
 | Leads | `/leads` | Pipeline stage cards, lead table, filters, detail side panel |
+| Tasks Inbox | `/tasks` | Global follow-up/task list, filter chips, optional summary counters, quick done action, lead navigation |
 | Conversations | `/conversations` | Conversation list, chat thread, AI suggestion chips, lead info panel |
 | Chatbot | `/chatbot` | Config forms, objection tags, trigger toggles, preview thread, advanced settings |
 | Recovery | `/recovery` | Recovery KPIs, cold lead table, sequence cards, recovery message templates |
@@ -59,6 +62,7 @@ Routes implemented:
 
 ### 3.2 Commercial operation
 - `Lead`
+- `Task`
 - `LeadTimelineEvent`
 - `Conversation`
 - `Message`
@@ -308,7 +312,19 @@ Contract:
 - `PATCH /tasks/:taskId`
 - `PATCH /tasks/:taskId/status`
 
-### 8.4 Conversations
+### 8.4 Global Tasks Inbox
+UI evidence:
+- Workspace-wide follow-up list with pending/today/overdue/done filters.
+- Optional counters panel when backend exposes summary endpoint.
+- Per-task lead reference with navigation to lead detail flow.
+- Quick "mark done" action when backend status endpoint is available.
+
+Contract:
+- `GET /tasks`
+- `GET /tasks/summary` (optional)
+- `PATCH /tasks/:taskId/status` (optional quick update)
+
+### 8.5 Conversations
 UI evidence:
 - Conversation list, unread badges, message thread, lead side panel, AI suggestion chips.
 
@@ -319,7 +335,7 @@ Contract:
 - `POST /conversations/:conversationId/assign`
 - `POST /conversations/:conversationId/close`
 
-### 8.5 Chatbot
+### 8.6 Chatbot
 UI evidence:
 - Assistant identity, objective, tone, behavior rules, triggers, canned message examples.
 
@@ -330,7 +346,7 @@ Contract:
 - `PATCH /chatbot/triggers/:triggerId`
 - `POST /chatbot/simulate`
 
-### 8.6 Recovery
+### 8.7 Recovery
 UI evidence:
 - Cold lead table, reactivation metrics, sequence definitions, template messages.
 
@@ -342,7 +358,7 @@ Contract:
 - `PATCH /recovery/sequences/:sequenceId`
 - `GET /recovery/metrics`
 
-### 8.7 Campaigns
+### 8.8 Campaigns
 UI evidence:
 - Campaign listing with status and performance, campaign editor, result stats.
 
@@ -354,7 +370,7 @@ Contract:
 - `POST /campaigns/:campaignId/pause`
 - `GET /campaigns/:campaignId/performance`
 
-### 8.8 Imports
+### 8.9 Imports
 UI evidence:
 - Upload flow (upload, map, validate, import), mapping table, validation summary.
 
@@ -365,7 +381,7 @@ Contract:
 - `POST /imports/:importId/validate`
 - `POST /imports/:importId/commit`
 
-### 8.9 Deal Probability
+### 8.10 Deal Probability
 UI evidence:
 - Ranking list with score, tier, positive/risk signals, recommended action.
 
@@ -374,7 +390,7 @@ Contract:
 - `GET /deal-probability/distribution`
 - `POST /deal-probability/recalculate` (optional async job)
 
-### 8.10 Offer Optimizer
+### 8.11 Offer Optimizer
 UI evidence:
 - Before/after message optimization blocks, quality metrics, optimization tags.
 
@@ -383,7 +399,7 @@ Contract:
 - `GET /offer-optimizer/metrics`
 - `GET /offer-optimizer/recommendations`
 
-### 8.11 Revenue Intelligence
+### 8.12 Revenue Intelligence
 UI evidence:
 - KPI overview, automatic insights, revenue flow chart, segment table.
 
@@ -393,7 +409,7 @@ Contract:
 - `GET /revenue/intelligence/segments`
 - `GET /revenue/intelligence/flow`
 
-### 8.12 Revenue Reports
+### 8.13 Revenue Reports
 UI evidence:
 - Time range filters, monthly table, top campaigns list, segment closure bars.
 
@@ -404,7 +420,7 @@ Contract:
 - `GET /revenue/reports/segments`
 - `GET /revenue/reports/export` (csv/xlsx/pdf)
 
-### 8.13 Settings
+### 8.14 Settings
 UI evidence:
 - Profile, team, automations, notification matrix, billing panel, integrations.
 
@@ -418,7 +434,7 @@ Contract:
 - `GET /settings/integrations`
 - `POST /settings/integrations/:provider/connect`
 
-### 8.14 Dashboard Overview
+### 8.15 Dashboard Overview
 UI evidence:
 - Composite dashboard with multi-module KPIs and widgets.
 
@@ -447,7 +463,7 @@ Contract:
 - `Index.tsx` exists but is not routed from `App.tsx`.
 - `App.css` keeps Vite template styles and appears unused by current pages.
 - UTF-8/encoding artifacts are visible in multiple Spanish strings.
-- Domain logic is still UI-only in modules not yet integrated (Conversations, Recovery, Campaigns, Revenue, etc.).
+- Domain logic is still UI-only in modules not yet integrated (Conversations, Recovery, Campaigns, Revenue, etc.), while Leads and global Tasks Inbox are now connected.
 
 ## 11) Contract changelog
 
@@ -458,3 +474,4 @@ Contract:
 | 2026-03-08 | Leads contract aligned to real backend usage (`/leads` GET/POST, `/leads/:id` GET/PATCH, `/leads/:id/status` PATCH) with shared `{data,error}` envelope handling. | non-breaking | Leads list/detail/create/edit/status now persist to backend in authenticated workspace scope. |
 | 2026-03-08 | Lead activity contract connected in lead detail (`/leads/:id/activity` GET/POST) including manual note creation and refresh flow. | non-breaking | Lead detail activity feed now reads/writes against backend instead of relying on embedded lead timeline payloads only. |
 | 2026-03-08 | Lead tasks contract connected in lead detail (`/leads/:id/tasks` GET/POST, `/tasks/:id` PATCH, `/tasks/:id/status` PATCH) with loading/error/empty states and post-mutation refresh. | non-breaking | Lead detail now supports real follow-up reminder listing, basic editing, and done/pending status updates without local mocks. |
+| 2026-03-08 | Global tasks inbox contract connected (`/tasks` GET, optional `/tasks/summary` GET, optional `/tasks/:id/status` PATCH) with workspace-wide filters and lead navigation support. | non-breaking | Operators can now run follow-up execution from one global queue without leaving dashboard scope. |

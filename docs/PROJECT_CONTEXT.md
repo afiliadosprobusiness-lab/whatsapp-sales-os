@@ -45,7 +45,17 @@
 - Leads query keys are centralized in `leadsQueryKeys` for list/detail cache invalidation.
 - Lead activity query keys are centralized in `leadActivityQueryKeys` for per-lead refresh after create.
 - Lead tasks query keys are centralized in `leadTasksQueryKeys` for per-lead task refresh after create/edit/status changes.
+- Leads route now accepts optional `leadId` query param (`/leads?leadId=...`) to open related lead context from global task flows.
 - Leads UX now handles `idle | loading | success | error | empty` states end-to-end.
+
+## Current Global Tasks Inbox Architecture
+- `src/services/tasks.service.ts` handles workspace-wide tasks requests with `fetch` + `credentials: "include"` and `{data,error}` envelope parsing.
+- Global tasks inbox screen (`src/pages/TasksInbox.tsx`) is connected to:
+  - `GET /tasks` for workspace queue listing.
+  - `GET /tasks/summary` for optional counters (graceful fallback when endpoint is unavailable).
+  - `PATCH /tasks/:id/status` for quick mark-done action when backend supports status endpoint.
+- Tasks query keys are centralized in `tasksQueryKeys` for list/summary refresh after mutations.
+- Global tasks UX now handles `loading | error | empty | success` with operational filters: `pending | today | overdue | done`.
 
 ## Route Access Model
 - Public routes:
@@ -56,6 +66,7 @@
 - Private routes (guarded by auth session):
   - `/dashboard`
   - `/leads`
+  - `/tasks`
   - `/conversations`
   - `/chatbot`
   - `/recovery`

@@ -21,6 +21,7 @@ import OfferOptimizer from "./pages/OfferOptimizer";
 import RevenueIntelligence from "./pages/RevenueIntelligence";
 import RevenueReports from "./pages/RevenueReports";
 import Settings from "./pages/Settings";
+import TasksInbox from "./pages/TasksInbox";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
             <Route element={<RequireAuth />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/leads" element={<Leads />} />
+              <Route path="/tasks" element={<TasksInbox />} />
               <Route path="/conversations" element={<Conversations />} />
               <Route path="/chatbot" element={<ChatbotAI />} />
               <Route path="/recovery" element={<Recovery />} />

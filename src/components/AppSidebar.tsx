@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
+  CheckSquare,
   MessageSquare,
   Bot,
   RefreshCw,
@@ -19,6 +20,7 @@ import { getUserInitials, useAuth } from "@/lib/session";
 const navItems = [
   { label: "Overview", icon: LayoutDashboard, path: "/dashboard" },
   { label: "Leads", icon: Users, path: "/leads" },
+  { label: "Tasks Inbox", icon: CheckSquare, path: "/tasks" },
   { label: "Conversaciones", icon: MessageSquare, path: "/conversations" },
   { label: "Chatbot IA", icon: Bot, path: "/chatbot" },
   { label: "Recuperación", icon: RefreshCw, path: "/recovery" },
@@ -94,4 +96,3 @@ export function AppSidebar() {
     </aside>
   );
 }
-
