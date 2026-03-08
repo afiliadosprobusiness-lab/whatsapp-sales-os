@@ -49,7 +49,8 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
 - Responsibilities:
   - Workspace identity in topbar.
   - Team member listing and role visualization.
-  - Business profile and branding settings.
+  - Business profile loading/saving against backend workspace scope (`GET/PATCH /workspace/me`).
+  - Branding settings (still UI-only placeholder).
 - Main screens/components:
   - `src/components/DashboardTopbar.tsx` (workspace switcher)
   - `src/pages/Settings.tsx` (profile, team)
@@ -198,7 +199,8 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
 ### O) Platform Settings Context
 - Purpose: operational configuration of workspace.
 - Responsibilities:
-  - Profile and branding.
+  - Profile settings connected to workspace API (`GET/PATCH /workspace/me`).
+  - Branding.
   - Team access.
   - Automation toggles.
   - Notification preferences.
@@ -238,5 +240,5 @@ Shared responsibilities:
 - No token or sensitive session data is persisted in `localStorage`; intended production strategy is cookie httpOnly + `GET /auth/me`.
 - Backend CORS currently whitelists `http://localhost:5173`; deployed frontend domain must be added in backend `FRONTEND_URL`.
 - Role-based route gating is still pending (only authenticated/guest guards are implemented).
-- No explicit cross-context store; each page owns local mock data.
+- No explicit cross-context store; most pages own local mock data, except Settings business profile which now uses React Query + workspace service.
 - Some text encoding artifacts appear in Spanish labels; should be normalized before production content freeze.

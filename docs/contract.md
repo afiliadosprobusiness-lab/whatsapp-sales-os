@@ -6,9 +6,10 @@ This document describes functional and structural contracts inferred from the cu
 Current status in codebase:
 - SPA with React + React Router.
 - All domain screens exist as routes.
-- Data in screens is static/mock (local arrays inside page components).
-- Auth module is integrated to production API with cookie session; non-auth modules remain static/mock.
-- `@tanstack/react-query` is configured globally, but not yet used by pages.
+- Most domain screens still render static/mock data (local arrays inside page components).
+- Auth module is integrated to production API with cookie session.
+- Settings business profile now uses real workspace API (`GET /workspace/me`, `PATCH /workspace/me`).
+- `@tanstack/react-query` is configured globally and is now used by Settings business profile integration.
 
 Routes implemented:
 - `/` Landing
@@ -281,8 +282,8 @@ UI evidence:
 - Business profile and branding fields.
 
 Contract:
-- `GET /workspaces/current`
-- `PATCH /workspaces/current`
+- `GET /workspace/me`
+- `PATCH /workspace/me`
 - `GET /workspaces/current/members`
 - `POST /workspaces/current/members/invite`
 - `PATCH /workspaces/current/members/:memberId`
@@ -433,7 +434,7 @@ Contract:
 ## 10) Current gaps to preserve during implementation
 
 - Authentication guards are active for private routes and guest-only auth routes.
-- Auth API integration is active; remaining domain modules are still UI-only mock data.
+- Auth API and workspace settings integration are active; remaining domain modules are still UI-only mock data.
 - `Index.tsx` exists but is not routed from `App.tsx`.
 - `App.css` keeps Vite template styles and appears unused by current pages.
 - UTF-8/encoding artifacts are visible in multiple Spanish strings.
@@ -444,3 +445,4 @@ Contract:
 | Date | Change | Type | Impact |
 |---|---|---|---|
 | 2026-03-08 | Auth contract aligned to real backend usage (`/auth/register`, `/auth/login`, `/auth/logout`, `/auth/me`) with `{data,error}` envelope and cookie session transport rules. | non-breaking | Frontend auth now depends on backend cookie session and backend error envelope parsing. |
+| 2026-03-08 | Workspace settings contract aligned to real backend usage (`/workspace/me` GET/PATCH) for business profile load/save in Settings. | non-breaking | Settings business profile no longer depends on local mocks and now persists against backend workspace scope. |

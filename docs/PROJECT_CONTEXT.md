@@ -4,7 +4,7 @@
 - Vite + React 18 + TypeScript.
 - React Router for SPA routing.
 - Tailwind + custom `ventrix-*` utility classes.
-- `@tanstack/react-query` configured globally (available for future data modules).
+- `@tanstack/react-query` configured globally (already used in Settings workspace profile; available for additional data modules).
 
 ## Current Auth Architecture
 - `src/lib/session.ts` centralizes authenticated user state for the entire app.
@@ -17,6 +17,14 @@
 - API base URL is read from `VITE_API_URL` (fallback `VITE_API_BASE_URL`, then production URL default).
 - Auth state machine in provider: `idle | loading | success | error | unauthorized`.
 - No sensitive auth data is stored in `localStorage`.
+
+## Current Workspace Settings Architecture
+- `src/services/workspace.service.ts` handles workspace requests with `fetch` + `credentials: "include"`.
+- Settings business profile (`src/pages/Settings.tsx`) is connected to:
+  - `GET /workspace/me` for loading current workspace data.
+  - `PATCH /workspace/me` for persisting business profile changes.
+- Settings now handles `loading | error | empty | success` states for workspace profile data.
+- React Query key base is `workspaceQueryKeys.me()` to support reuse in future modules (Leads, etc.).
 
 ## Route Access Model
 - Public routes:
