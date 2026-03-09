@@ -11,8 +11,11 @@ Current status in codebase:
 - Settings business profile now uses real workspace API (`GET /workspace/me`, `PATCH /workspace/me`).
 - Leads module now uses real backend API (`GET /leads`, `POST /leads`, `GET /leads/:id`, `PATCH /leads/:id`, `PATCH /leads/:id/status`).
 - Lead activity inside lead detail now uses real backend API (`GET /leads/:id/activity`, `POST /leads/:id/activity`) for historial and manual notes.
+- Lead WhatsApp messaging in lead detail now uses backend-owned endpoints (`GET /leads/:id/activity` as source of persisted history + `POST /leads/:id/messages` for manual replies).
 - Lead follow-up tasks inside lead detail now use real backend API (`GET /leads/:id/tasks`, `POST /leads/:id/tasks`, `PATCH /tasks/:id`, `PATCH /tasks/:id/status`) for reminders CRUD basico y estado.
 - Global tasks inbox now uses real backend API (`GET /tasks`) with optional summary (`GET /tasks/summary`) and optional quick status update (`PATCH /tasks/:id/status`).
+- Settings integrations now include backend-owned WhatsApp channel configuration (`GET /channels/whatsapp`, `POST /channels/whatsapp`, `PATCH /channels/whatsapp/:id`) with graceful unavailable states while Railway deploy is unstable.
+- YCloud remains only a backend channel provider adapter; frontend never calls provider APIs directly and CRM activity remains source of truth for visible conversation history.
 - `@tanstack/react-query` is configured globally and is now used by Settings business profile integration.
 
 Routes implemented:
@@ -307,6 +310,7 @@ Contract:
 - `PATCH /leads/:leadId/status`
 - `GET /leads/:leadId/activity`
 - `POST /leads/:leadId/activity`
+- `POST /leads/:leadId/messages`
 - `GET /leads/:leadId/tasks`
 - `POST /leads/:leadId/tasks`
 - `PATCH /tasks/:taskId`
@@ -433,6 +437,9 @@ Contract:
 - `GET /settings/billing`
 - `GET /settings/integrations`
 - `POST /settings/integrations/:provider/connect`
+- `GET /channels/whatsapp`
+- `POST /channels/whatsapp`
+- `PATCH /channels/whatsapp/:id`
 
 ### 8.15 Dashboard Overview
 UI evidence:
@@ -463,7 +470,7 @@ Contract:
 - `Index.tsx` exists but is not routed from `App.tsx`.
 - `App.css` keeps Vite template styles and appears unused by current pages.
 - UTF-8/encoding artifacts are visible in multiple Spanish strings.
-- Domain logic is still UI-only in modules not yet integrated (Conversations, Recovery, Campaigns, Revenue, etc.), while Leads and global Tasks Inbox are now connected.
+- Domain logic is still UI-only in modules not yet integrated (Conversations, Recovery, Campaigns, Revenue, etc.), while Settings profile/WhatsApp channel, Leads (including WhatsApp manual messaging), and global Tasks Inbox are connected.
 
 ## 11) Contract changelog
 
@@ -475,3 +482,4 @@ Contract:
 | 2026-03-08 | Lead activity contract connected in lead detail (`/leads/:id/activity` GET/POST) including manual note creation and refresh flow. | non-breaking | Lead detail activity feed now reads/writes against backend instead of relying on embedded lead timeline payloads only. |
 | 2026-03-08 | Lead tasks contract connected in lead detail (`/leads/:id/tasks` GET/POST, `/tasks/:id` PATCH, `/tasks/:id/status` PATCH) with loading/error/empty states and post-mutation refresh. | non-breaking | Lead detail now supports real follow-up reminder listing, basic editing, and done/pending status updates without local mocks. |
 | 2026-03-08 | Global tasks inbox contract connected (`/tasks` GET, optional `/tasks/summary` GET, optional `/tasks/:id/status` PATCH) with workspace-wide filters and lead navigation support. | non-breaking | Operators can now run follow-up execution from one global queue without leaving dashboard scope. |
+| 2026-03-09 | WhatsApp frontend contract connected to backend-owned channel + lead messaging (`GET/POST/PATCH /channels/whatsapp`, `POST /leads/:id/messages`, message view derived from `GET /leads/:id/activity`) with graceful handling for `404/501/503/timeout` during Railway incident windows. | non-breaking | CRM now exposes WhatsApp setup and manual messaging UX without direct provider calls; features auto-activate when backend deploy finishes. |

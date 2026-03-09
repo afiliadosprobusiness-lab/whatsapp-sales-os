@@ -18,7 +18,12 @@ import leadTasksService, {
   leadTasksServiceErrors,
 } from "@/services/lead-tasks.service";
 import leadsService, { leadsQueryKeys, leadsServiceErrors } from "@/services/leads.service";
+import leadMessagesService, {
+  leadMessagesQueryKeys,
+  leadMessagesServiceErrors,
+} from "@/services/lead-messages.service";
 import type { LeadActivity } from "@/types/lead-activity";
+import type { LeadMessage } from "@/types/lead-messages";
 import type { CreateLeadTaskRequest, LeadTask, LeadTaskStatus, UpdateLeadTaskRequest } from "@/types/lead-tasks";
 import type {
   CreateLeadRequest,
@@ -295,6 +300,8 @@ export default function Leads() {
   const [createForm, setCreateForm] = useState<LeadFormState>(EMPTY_LEAD_FORM);
   const [editForm, setEditForm] = useState<LeadFormState>(EMPTY_LEAD_FORM);
   const [activityNoteDraft, setActivityNoteDraft] = useState("");
+  const [messageDraft, setMessageDraft] = useState("");
+  const [sendMessageError, setSendMessageError] = useState<string | null>(null);
   const [createTaskForm, setCreateTaskForm] = useState<LeadTaskFormState>(EMPTY_TASK_FORM);
   const [editTaskForm, setEditTaskForm] = useState<LeadTaskFormState>(EMPTY_TASK_FORM);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
@@ -338,6 +345,12 @@ export default function Leads() {
   const leadActivityQuery = useQuery({
     queryKey: selectedLeadId ? leadActivityQueryKeys.list(selectedLeadId) : leadActivityQueryKeys.list("idle"),
     queryFn: () => leadActivityService.list(selectedLeadId as string),
+    enabled: Boolean(selectedLeadId),
+    retry: false,
+  });
+  const leadMessagesQuery = useQuery({
+    queryKey: selectedLeadId ? leadMessagesQueryKeys.list(selectedLeadId) : leadMessagesQueryKeys.list("idle"),
+    queryFn: () => leadMessagesService.listFromLeadActivity(selectedLeadId as string),
     enabled: Boolean(selectedLeadId),
     retry: false,
   });
@@ -428,6 +441,31 @@ export default function Leads() {
       toast.error(leadActivityServiceErrors.getMessage(error, "No pudimos registrar la actividad."));
     },
   });
+  const sendLeadMessageMutation = useMutation({
+    mutationFn: ({ leadId, text }: { leadId: string; text: string }) =>
+      leadMessagesService.sendManual(leadId, {
+        channel: "WHATSAPP",
+        text,
+      }),
+    onSuccess: async (_, variables) => {
+      setMessageDraft("");
+      setSendMessageError(null);
+      toast.success("Mensaje enviado.");
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: leadMessagesQueryKeys.list(variables.leadId),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: leadActivityQueryKeys.list(variables.leadId),
+        }),
+      ]);
+    },
+    onError: (error) => {
+      const message = leadMessagesServiceErrors.getMessage(error, "No pudimos enviar el mensaje.");
+      setSendMessageError(message);
+      toast.error(message);
+    },
+  });
   const createLeadTaskMutation = useMutation({
     mutationFn: ({ leadId, payload }: { leadId: string; payload: CreateLeadTaskRequest }) =>
       leadTasksService.createByLead(leadId, payload),
@@ -486,6 +524,9 @@ export default function Leads() {
 
   useEffect(() => {
     setActivityNoteDraft("");
+    setMessageDraft("");
+    setSendMessageError(null);
+    sendLeadMessageMutation.reset();
     setCreateTaskForm(EMPTY_TASK_FORM);
     setEditTaskForm(EMPTY_TASK_FORM);
     setEditingTaskId(null);
@@ -554,6 +595,19 @@ export default function Leads() {
         : activityItems.length === 0
           ? "empty"
           : "success";
+  const messageItems: LeadMessage[] = leadMessagesQuery.data ?? [];
+  const messagesState: LeadsViewState = !selectedLeadId
+    ? "idle"
+    : leadMessagesQuery.isLoading
+      ? "loading"
+      : leadMessagesQuery.isError
+        ? "error"
+        : messageItems.length === 0
+          ? "empty"
+          : "success";
+  const isLeadMessagesUnavailable =
+    (leadMessagesQuery.isError && leadMessagesServiceErrors.isUnavailable(leadMessagesQuery.error)) ||
+    (sendLeadMessageMutation.isError && leadMessagesServiceErrors.isUnavailable(sendLeadMessageMutation.error));
   const taskItems: LeadTask[] = leadTasksQuery.data ?? [];
   const tasksState: LeadsViewState = !selectedLeadId
     ? "idle"
@@ -629,6 +683,24 @@ export default function Leads() {
     }
 
     createLeadActivityMutation.mutate({ leadId: selectedLeadId, note });
+  };
+  const handleSendLeadMessage = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!selectedLeadId) {
+      return;
+    }
+
+    const text = messageDraft.trim();
+    if (!text) {
+      return;
+    }
+
+    setSendMessageError(null);
+    sendLeadMessageMutation.mutate({
+      leadId: selectedLeadId,
+      text,
+    });
   };
 
   const handleCreateTaskFieldChange =
@@ -1094,6 +1166,158 @@ export default function Leads() {
                           disabled={createLeadTaskMutation.isPending || createTaskForm.title.trim().length === 0}
                         >
                           Crear tarea
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+
+                  <div>
+                    <div className="mb-2 flex items-center justify-between">
+                      <p className="text-xs font-medium">Mensajes WhatsApp</p>
+                      <button
+                        type="button"
+                        className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                        onClick={() => {
+                          sendLeadMessageMutation.reset();
+                          void leadMessagesQuery.refetch();
+                          void leadActivityQuery.refetch();
+                        }}
+                        disabled={leadMessagesQuery.isFetching}
+                      >
+                        {leadMessagesQuery.isFetching ? "Actualizando..." : "Refrescar"}
+                      </button>
+                    </div>
+
+                    <div className="space-y-2">
+                      {messagesState === "loading" ? (
+                        <div className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground flex items-center gap-2">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          Cargando mensajes...
+                        </div>
+                      ) : null}
+
+                      {messagesState === "error" && isLeadMessagesUnavailable ? (
+                        <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-xs" role="status">
+                          <p className="font-medium text-warning">Mensajeria WhatsApp no disponible temporalmente.</p>
+                          <p className="mt-1 text-muted-foreground">
+                            El endpoint de mensajes puede estar pendiente de despliegue. Esta vista quedara operativa automaticamente
+                            cuando backend responda.
+                          </p>
+                          <button
+                            type="button"
+                            className="mt-2 ventrix-btn-secondary h-7 px-2 text-[10px]"
+                            onClick={() => {
+                              void leadMessagesQuery.refetch();
+                            }}
+                          >
+                            Reintentar
+                          </button>
+                        </div>
+                      ) : null}
+
+                      {messagesState === "error" && !isLeadMessagesUnavailable ? (
+                        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-xs" role="alert">
+                          <p className="font-medium text-destructive">No pudimos cargar los mensajes de WhatsApp.</p>
+                          <p className="mt-1 text-muted-foreground">
+                            {leadMessagesServiceErrors.getMessage(
+                              leadMessagesQuery.error,
+                              "Ocurrio un error inesperado con los mensajes.",
+                            )}
+                          </p>
+                          <button
+                            type="button"
+                            className="mt-2 ventrix-btn-secondary h-7 px-2 text-[10px]"
+                            onClick={() => {
+                              void leadMessagesQuery.refetch();
+                            }}
+                          >
+                            Reintentar
+                          </button>
+                        </div>
+                      ) : null}
+
+                      {messagesState === "empty" ? (
+                        <div className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
+                          Aun no hay mensajes de WhatsApp persistidos para este lead.
+                        </div>
+                      ) : null}
+
+                      {messagesState === "success" ? (
+                        <div className="space-y-2 rounded-lg border p-2.5">
+                          {messageItems.map((messageItem) => (
+                            <div
+                              key={messageItem.id}
+                              className={`flex ${messageItem.direction === "outbound" ? "justify-end" : "justify-start"}`}
+                            >
+                              <div
+                                className={`max-w-[85%] rounded-lg px-3 py-2 text-xs ${
+                                  messageItem.direction === "outbound"
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-muted text-foreground"
+                                }`}
+                              >
+                                <p className="whitespace-pre-wrap break-words">{messageItem.text}</p>
+                                <p
+                                  className={`mt-1 text-[10px] ${
+                                    messageItem.direction === "outbound"
+                                      ? "text-primary-foreground/80"
+                                      : "text-muted-foreground"
+                                  }`}
+                                >
+                                  {messageItem.direction === "outbound"
+                                    ? "Saliente"
+                                    : messageItem.direction === "inbound"
+                                      ? "Entrante"
+                                      : "Mensaje"}{" "}
+                                  · {toRelativeTime(messageItem.createdAt)}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <form onSubmit={handleSendLeadMessage} className="space-y-2 mt-3">
+                      <p className="text-xs font-medium">Responder manualmente</p>
+                      <textarea
+                        className="ventrix-input min-h-20 text-sm py-2"
+                        placeholder="Escribe una respuesta para enviar por WhatsApp..."
+                        value={messageDraft}
+                        onChange={(event) => {
+                          setMessageDraft(event.target.value);
+                          if (sendMessageError) {
+                            setSendMessageError(null);
+                          }
+                          if (sendLeadMessageMutation.isError) {
+                            sendLeadMessageMutation.reset();
+                          }
+                        }}
+                        disabled={sendLeadMessageMutation.isPending || isLeadMessagesUnavailable}
+                      />
+
+                      {sendMessageError ? (
+                        <p className={`${isLeadMessagesUnavailable ? "text-warning" : "text-destructive"} text-[10px]`}>
+                          {sendMessageError}
+                        </p>
+                      ) : null}
+
+                      <div className="flex items-center justify-between">
+                        {sendLeadMessageMutation.isPending ? (
+                          <p className="text-[10px] text-muted-foreground">Enviando mensaje...</p>
+                        ) : (
+                          <span />
+                        )}
+                        <button
+                          type="submit"
+                          className="ventrix-btn-secondary h-8 px-3 text-xs"
+                          disabled={
+                            sendLeadMessageMutation.isPending ||
+                            isLeadMessagesUnavailable ||
+                            messageDraft.trim().length === 0
+                          }
+                        >
+                          Enviar WhatsApp
                         </button>
                       </div>
                     </form>

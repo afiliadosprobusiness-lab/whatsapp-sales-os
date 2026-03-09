@@ -7,8 +7,13 @@ import workspaceService, {
   workspaceQueryKeys,
   workspaceServiceErrors,
 } from "@/services/workspace.service";
+import whatsappChannelService, {
+  whatsappChannelQueryKeys,
+  whatsappChannelServiceErrors,
+} from "@/services/whatsapp-channel.service";
+import type { UpsertWhatsAppChannelRequest, WhatsAppChannel } from "@/types/whatsapp-channel";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Building, Palette, Users, Zap, Bell, CreditCard, Link2 } from "lucide-react";
+import { Building, Palette, Users, Zap, Bell, CreditCard, Link2, Loader2, MessageSquare } from "lucide-react";
 
 const tabs = [
   { label: "Perfil", icon: Building },
@@ -27,7 +32,6 @@ const teamMembers = [
 ];
 
 const integrations = [
-  { name: "WhatsApp Business API", status: "Conectado", desc: "Canal principal de comunicacion" },
   { name: "Shopify", status: "Disponible", desc: "Sincroniza pedidos y clientes" },
   { name: "WooCommerce", status: "Disponible", desc: "Importa pedidos automaticamente" },
   { name: "Google Sheets", status: "Disponible", desc: "Exporta datos en tiempo real" },
@@ -55,10 +59,24 @@ interface WorkspaceProfileFormState {
   timezone: string;
 }
 
+interface WhatsAppChannelFormState {
+  provider: string;
+  status: string;
+  displayName: string;
+  phoneNumber: string;
+}
+
 const EMPTY_PROFILE_FORM: WorkspaceProfileFormState = {
   businessName: "",
   country: "",
   timezone: "",
+};
+
+const EMPTY_WHATSAPP_FORM: WhatsAppChannelFormState = {
+  provider: "YCLOUD",
+  status: "ACTIVE",
+  displayName: "",
+  phoneNumber: "",
 };
 
 const toProfileFormState = (workspace: Workspace): WorkspaceProfileFormState => ({
@@ -66,6 +84,19 @@ const toProfileFormState = (workspace: Workspace): WorkspaceProfileFormState => 
   country: workspace.country ?? "",
   timezone: workspace.timezone ?? "",
 });
+
+const toWhatsAppChannelFormState = (channel: WhatsAppChannel | null): WhatsAppChannelFormState => {
+  if (!channel) {
+    return EMPTY_WHATSAPP_FORM;
+  }
+
+  return {
+    provider: channel.provider || "YCLOUD",
+    status: channel.status || "ACTIVE",
+    displayName: channel.displayName ?? "",
+    phoneNumber: channel.phoneNumber ?? "",
+  };
+};
 
 const withCurrentOption = (value: string, options: readonly string[]) => {
   if (!value.trim()) {
@@ -78,13 +109,41 @@ const withCurrentOption = (value: string, options: readonly string[]) => {
 const countryLabelByValue = new Map(countryOptions.map((option) => [option.value, option.label]));
 const timezoneLabelByValue = new Map(timezoneOptions.map((option) => [option.value, option.label]));
 
+const whatsappStatusBadgeClassByValue: Record<string, string> = {
+  ACTIVE: "ventrix-badge-success",
+  PAUSED: "ventrix-badge-warning",
+  PENDING: "ventrix-badge-warning",
+  INACTIVE: "ventrix-badge-danger",
+  DISCONNECTED: "ventrix-badge-danger",
+  ERROR: "ventrix-badge-danger",
+  UNKNOWN: "ventrix-badge-info",
+};
+
+const whatsappStatusLabelByValue: Record<string, string> = {
+  ACTIVE: "Activo",
+  PAUSED: "Pausado",
+  PENDING: "Pendiente",
+  INACTIVE: "Inactivo",
+  DISCONNECTED: "Desconectado",
+  ERROR: "Error",
+  UNKNOWN: "Sin estado",
+};
+
+const whatsappStatusOptions = ["ACTIVE", "PAUSED", "INACTIVE"] as const;
+
 export default function Settings() {
   const queryClient = useQueryClient();
   const [profileForm, setProfileForm] = useState<WorkspaceProfileFormState>(EMPTY_PROFILE_FORM);
+  const [whatsappForm, setWhatsappForm] = useState<WhatsAppChannelFormState>(EMPTY_WHATSAPP_FORM);
 
   const workspaceQuery = useQuery({
     queryKey: workspaceQueryKeys.me(),
     queryFn: () => workspaceService.me(),
+    retry: false,
+  });
+  const whatsappChannelQuery = useQuery({
+    queryKey: whatsappChannelQueryKeys.current(),
+    queryFn: () => whatsappChannelService.getCurrent(),
     retry: false,
   });
 
@@ -98,6 +157,24 @@ export default function Settings() {
       toast.error(workspaceServiceErrors.getMessage(error, "No pudimos guardar los cambios del negocio."));
     },
   });
+  const saveWhatsappChannelMutation = useMutation({
+    mutationFn: (payload: UpsertWhatsAppChannelRequest) => {
+      const channelId = whatsappChannelQuery.data?.id;
+      if (channelId) {
+        return whatsappChannelService.update(channelId, payload);
+      }
+
+      return whatsappChannelService.create(payload);
+    },
+    onSuccess: (channel) => {
+      queryClient.setQueryData(whatsappChannelQueryKeys.current(), channel);
+      setWhatsappForm(toWhatsAppChannelFormState(channel));
+      toast.success("Canal de WhatsApp guardado correctamente.");
+    },
+    onError: (error) => {
+      toast.error(whatsappChannelServiceErrors.getMessage(error, "No pudimos guardar el canal de WhatsApp."));
+    },
+  });
 
   useEffect(() => {
     if (!workspaceQuery.data) {
@@ -106,6 +183,14 @@ export default function Settings() {
 
     setProfileForm(toProfileFormState(workspaceQuery.data));
   }, [workspaceQuery.data]);
+  useEffect(() => {
+    if (!whatsappChannelQuery.data) {
+      setWhatsappForm(EMPTY_WHATSAPP_FORM);
+      return;
+    }
+
+    setWhatsappForm(toWhatsAppChannelFormState(whatsappChannelQuery.data));
+  }, [whatsappChannelQuery.data]);
 
   const countrySelectOptions = useMemo(
     () => withCurrentOption(profileForm.country, countryOptions.map((option) => option.value)),
@@ -116,12 +201,22 @@ export default function Settings() {
     () => withCurrentOption(profileForm.timezone, timezoneOptions.map((option) => option.value)),
     [profileForm.timezone],
   );
+  const whatsappProviderOptions = useMemo(
+    () => withCurrentOption(whatsappForm.provider, ["YCLOUD"]),
+    [whatsappForm.provider],
+  );
 
   const handleProfileFieldChange =
     (field: keyof WorkspaceProfileFormState) =>
     (event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
       const nextValue = event.target.value;
       setProfileForm((prev) => ({ ...prev, [field]: nextValue }));
+    };
+  const handleWhatsAppFieldChange =
+    (field: keyof WhatsAppChannelFormState) =>
+    (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const nextValue = event.target.value;
+      setWhatsappForm((prev) => ({ ...prev, [field]: nextValue }));
     };
 
   const handleSubmitWorkspaceProfile = (event: FormEvent<HTMLFormElement>) => {
@@ -144,10 +239,32 @@ export default function Settings() {
       timezone: profileForm.timezone,
     });
   };
+  const handleSubmitWhatsAppChannel = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const payload: UpsertWhatsAppChannelRequest = {
+      provider: whatsappForm.provider.trim(),
+      status: whatsappForm.status.trim(),
+      displayName: whatsappForm.displayName.trim() || undefined,
+      phoneNumber: whatsappForm.phoneNumber.trim() || undefined,
+    };
+
+    saveWhatsappChannelMutation.mutate(payload);
+  };
 
   const isWorkspaceLoading = workspaceQuery.isLoading;
   const isWorkspaceError = workspaceQuery.isError;
   const workspace = workspaceQuery.data;
+  const whatsappChannel = whatsappChannelQuery.data ?? null;
+  const isWhatsAppLoading = whatsappChannelQuery.isLoading;
+  const isWhatsAppUnavailable =
+    whatsappChannelQuery.isError && whatsappChannelServiceErrors.isUnavailable(whatsappChannelQuery.error);
+  const isWhatsAppError = whatsappChannelQuery.isError && !isWhatsAppUnavailable;
+  const isWhatsAppConfigured = Boolean(whatsappChannel?.id);
+  const normalizedChannelStatus = (whatsappChannel?.status ?? whatsappForm.status ?? "UNKNOWN").toUpperCase();
+  const currentStatusLabel = whatsappStatusLabelByValue[normalizedChannelStatus] ?? normalizedChannelStatus;
+  const currentStatusBadgeClass = whatsappStatusBadgeClassByValue[normalizedChannelStatus] ?? "ventrix-badge-info";
+  const isSavingWhatsappChannel = saveWhatsappChannelMutation.isPending;
 
   return (
     <DashboardLayout title="Configuracion">
@@ -449,29 +566,185 @@ export default function Settings() {
             <h3 className="font-display font-semibold mb-5 flex items-center gap-2">
               <Link2 className="w-4 h-4" /> Integraciones
             </h3>
-            <div className="grid md:grid-cols-2 gap-3">
-              {integrations.map((integration, index) => (
-                <div key={index} className="border rounded-xl p-4 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                    <Link2 className="w-5 h-5 text-muted-foreground" />
+            <div className="space-y-4">
+              <div className="rounded-xl border p-4 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium flex items-center gap-1.5">
+                      <MessageSquare className="w-4 h-4" /> Canal WhatsApp
+                    </p>
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      Esta configuracion usa solo el backend del CRM. El frontend no se conecta directo al proveedor.
+                    </p>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{integration.name}</p>
-                    <p className="text-[10px] text-muted-foreground">{integration.desc}</p>
-                  </div>
-                  <span
-                    className={`ventrix-badge text-[10px] ${
-                      integration.status === "Conectado"
-                        ? "ventrix-badge-success"
-                        : integration.status === "Disponible"
-                          ? "ventrix-badge-info"
-                          : "ventrix-badge-warning"
-                    }`}
-                  >
-                    {integration.status}
+                  <span className={`ventrix-badge text-[10px] ${currentStatusBadgeClass}`}>
+                    {isWhatsAppConfigured ? currentStatusLabel : isWhatsAppUnavailable ? "No disponible" : "Sin configurar"}
                   </span>
                 </div>
-              ))}
+
+                {isWhatsAppLoading ? (
+                  <div className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground inline-flex items-center gap-2">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Cargando canal WhatsApp...
+                  </div>
+                ) : null}
+
+                {isWhatsAppUnavailable ? (
+                  <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-xs" role="status">
+                    <p className="font-medium text-warning">Canal WhatsApp no disponible temporalmente.</p>
+                    <p className="mt-1 text-muted-foreground">
+                      El endpoint puede estar pendiente de despliegue en Railway. La pantalla ya esta preparada y se activara cuando
+                      backend responda.
+                    </p>
+                    <button
+                      type="button"
+                      className="mt-2 ventrix-btn-secondary h-7 px-2 text-[10px]"
+                      onClick={() => {
+                        void whatsappChannelQuery.refetch();
+                      }}
+                    >
+                      Reintentar
+                    </button>
+                  </div>
+                ) : null}
+
+                {isWhatsAppError ? (
+                  <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-xs" role="alert">
+                    <p className="font-medium text-destructive">No pudimos cargar el canal WhatsApp.</p>
+                    <p className="mt-1 text-muted-foreground">
+                      {whatsappChannelServiceErrors.getMessage(
+                        whatsappChannelQuery.error,
+                        "Ocurrio un error inesperado con la configuracion del canal.",
+                      )}
+                    </p>
+                    <button
+                      type="button"
+                      className="mt-2 ventrix-btn-secondary h-7 px-2 text-[10px]"
+                      onClick={() => {
+                        void whatsappChannelQuery.refetch();
+                      }}
+                    >
+                      Reintentar
+                    </button>
+                  </div>
+                ) : null}
+
+                {!isWhatsAppLoading && !whatsappChannelQuery.isError ? (
+                  <form onSubmit={handleSubmitWhatsAppChannel} className="space-y-3">
+                    <div className="grid md:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground mb-1 block">Provider</label>
+                        <select
+                          className="ventrix-input h-8 text-xs"
+                          value={whatsappForm.provider}
+                          onChange={handleWhatsAppFieldChange("provider")}
+                          disabled={isSavingWhatsappChannel}
+                        >
+                          {whatsappProviderOptions.map((option) => (
+                            <option key={option} value={option}>
+                              {option}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground mb-1 block">Estado del canal</label>
+                        <select
+                          className="ventrix-input h-8 text-xs"
+                          value={whatsappForm.status}
+                          onChange={handleWhatsAppFieldChange("status")}
+                          disabled={isSavingWhatsappChannel}
+                        >
+                          {whatsappStatusOptions.map((option) => (
+                            <option key={option} value={option}>
+                              {whatsappStatusLabelByValue[option]}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground mb-1 block">Nombre del canal</label>
+                        <input
+                          className="ventrix-input h-8 text-xs"
+                          placeholder="Ej: Ventas principal"
+                          value={whatsappForm.displayName}
+                          onChange={handleWhatsAppFieldChange("displayName")}
+                          disabled={isSavingWhatsappChannel}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground mb-1 block">Numero WhatsApp</label>
+                        <input
+                          className="ventrix-input h-8 text-xs"
+                          placeholder="+51999999999"
+                          value={whatsappForm.phoneNumber}
+                          onChange={handleWhatsAppFieldChange("phoneNumber")}
+                          disabled={isSavingWhatsappChannel}
+                        />
+                      </div>
+                    </div>
+
+                    {isWhatsAppConfigured && whatsappChannel ? (
+                      <div className="rounded-lg bg-muted/40 p-2.5 text-[10px] text-muted-foreground">
+                        <p>
+                          Canal activo: <span className="font-medium text-foreground">{whatsappChannel.id}</span>
+                        </p>
+                        <p>
+                          Provider actual: <span className="font-medium text-foreground">{whatsappChannel.provider}</span>
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-[10px] text-muted-foreground">
+                        No hay canal configurado aun. Guarda este formulario para registrar el canal en backend.
+                      </p>
+                    )}
+
+                    {saveWhatsappChannelMutation.isError ? (
+                      <p className="text-[10px] text-destructive">
+                        {whatsappChannelServiceErrors.getMessage(
+                          saveWhatsappChannelMutation.error,
+                          "No pudimos guardar la configuracion del canal.",
+                        )}
+                      </p>
+                    ) : null}
+
+                    <div className="flex justify-end">
+                      <button type="submit" className="ventrix-btn-primary h-8 px-3 text-xs" disabled={isSavingWhatsappChannel}>
+                        {isSavingWhatsappChannel
+                          ? "Guardando..."
+                          : isWhatsAppConfigured
+                            ? "Actualizar canal"
+                            : "Guardar canal"}
+                      </button>
+                    </div>
+                  </form>
+                ) : null}
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-3">
+                {integrations.map((integration, index) => (
+                  <div key={index} className="border rounded-xl p-4 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                      <Link2 className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{integration.name}</p>
+                      <p className="text-[10px] text-muted-foreground">{integration.desc}</p>
+                    </div>
+                    <span
+                      className={`ventrix-badge text-[10px] ${
+                        integration.status === "Conectado"
+                          ? "ventrix-badge-success"
+                          : integration.status === "Disponible"
+                            ? "ventrix-badge-info"
+                            : "ventrix-badge-warning"
+                      }`}
+                    >
+                      {integration.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

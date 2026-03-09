@@ -4,7 +4,7 @@
 - Vite + React 18 + TypeScript.
 - React Router for SPA routing.
 - Tailwind + custom `ventrix-*` utility classes.
-- `@tanstack/react-query` configured globally (already used in Settings workspace profile; available for additional data modules).
+- `@tanstack/react-query` configured globally (already used in Settings workspace profile, WhatsApp channel, Leads, lead messaging, and global tasks).
 
 ## Current Auth Architecture
 - `src/lib/session.ts` centralizes authenticated user state for the entire app.
@@ -26,9 +26,20 @@
 - Settings now handles `loading | error | empty | success` states for workspace profile data.
 - React Query key base is `workspaceQueryKeys.me()` to support reuse in future modules (Leads, etc.).
 
+## Current WhatsApp Channel Settings Architecture
+- `src/services/whatsapp-channel.service.ts` handles channel requests with `fetch` + `credentials: "include"` and timeout/network-aware errors.
+- Settings integrations section (`src/pages/Settings.tsx`) is connected to:
+  - `GET /channels/whatsapp` for current channel status/provider visibility.
+  - `POST /channels/whatsapp` for first-time channel setup.
+  - `PATCH /channels/whatsapp/:id` for channel updates.
+- WhatsApp channel query key is centralized in `whatsappChannelQueryKeys.current()` for cache reuse.
+- Settings WhatsApp UX handles `loading | error | unavailable | empty | success`.
+- Frontend does not talk to YCloud directly; provider details stay abstracted behind backend provider/adapters architecture.
+
 ## Current Leads Architecture
 - `src/services/leads.service.ts` handles lead requests with `fetch` + `credentials: "include"` and `{data,error}` envelope parsing.
 - `src/services/lead-activity.service.ts` handles lead activity requests with the same transport/error strategy.
+- `src/services/lead-messages.service.ts` derives WhatsApp messages from activity and sends manual replies through backend endpoints.
 - `src/services/lead-tasks.service.ts` handles lead follow-up tasks requests with the same transport/error strategy.
 - Leads screen (`src/pages/Leads.tsx`) is connected to:
   - `GET /leads` for list and pipeline.
@@ -37,6 +48,8 @@
   - `PATCH /leads/:id` for lead editing.
   - `PATCH /leads/:id/status` for fast status changes.
   - `GET /leads/:id/activity` for per-lead activity history.
+  - `GET /leads/:id/activity` (same source) for WhatsApp message timeline rendering in lead detail.
+  - `POST /leads/:id/messages` for manual WhatsApp reply from lead detail.
   - `POST /leads/:id/activity` for manual note/activity creation.
   - `GET /leads/:id/tasks` for per-lead follow-up reminders.
   - `POST /leads/:id/tasks` for follow-up task creation.
@@ -44,9 +57,11 @@
   - `PATCH /tasks/:id/status` for done/pending/cancelled status updates.
 - Leads query keys are centralized in `leadsQueryKeys` for list/detail cache invalidation.
 - Lead activity query keys are centralized in `leadActivityQueryKeys` for per-lead refresh after create.
+- Lead message query keys are centralized in `leadMessagesQueryKeys` for per-lead messaging refresh after send.
 - Lead tasks query keys are centralized in `leadTasksQueryKeys` for per-lead task refresh after create/edit/status changes.
 - Leads route now accepts optional `leadId` query param (`/leads?leadId=...`) to open related lead context from global task flows.
-- Leads UX now handles `idle | loading | success | error | empty` states end-to-end.
+- Leads UX now handles `idle | loading | success | error | empty` states end-to-end, including graceful fallback when WhatsApp messaging endpoints are unavailable (`404/501/503/timeout`).
+- Persisted CRM activity remains the visible source of truth for WhatsApp conversation timeline in lead detail.
 
 ## Current Global Tasks Inbox Architecture
 - `src/services/tasks.service.ts` handles workspace-wide tasks requests with `fetch` + `credentials: "include"` and `{data,error}` envelope parsing.

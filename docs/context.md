@@ -11,6 +11,8 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
 - campaign execution,
 - AI-assisted optimization,
 - revenue visibility.
+- Backend-owned channel integration (YCloud only as provider adapter, never called directly from frontend).
+- Conversation history persisted and rendered inside CRM as product source of truth.
 
 ## 3) Context inventory
 
@@ -76,10 +78,13 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
   - Lead table with priority/score/probability/value from backend data.
   - Lead detail panel with backend detail fetch (`GET /leads/:id`).
   - Lead activity timeline fetch from dedicated backend endpoint (`GET /leads/:id/activity`).
+  - WhatsApp message timeline rendering in lead detail, derived from persisted activity events (`GET /leads/:id/activity`).
+  - Manual WhatsApp reply from lead detail (`POST /leads/:id/messages`) with immediate refresh of timeline/activity.
   - Manual note/activity creation from lead detail (`POST /leads/:id/activity`) with immediate refresh.
   - Lead follow-up tasks listing from backend (`GET /leads/:id/tasks`) with explicit loading/error/empty handling.
   - Lead follow-up task creation and basic editing (`POST /leads/:id/tasks`, `PATCH /tasks/:id`).
   - Lead follow-up task status updates (`PATCH /tasks/:id/status`) with per-lead refresh after mutations.
+  - Graceful fallback states for WhatsApp module rollout (`404 | 501 | 503 | timeout`) without breaking lead detail UI.
   - Basic lead operations: create, edit, and status update against backend.
   - Explicit UI data states: `idle | loading | success | error | empty`.
 - Main screens/components:
@@ -88,6 +93,8 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
   - `src/types/leads.ts`
   - `src/services/lead-activity.service.ts`
   - `src/types/lead-activity.ts`
+  - `src/services/lead-messages.service.ts`
+  - `src/types/lead-messages.ts`
   - `src/services/lead-tasks.service.ts`
   - `src/types/lead-tasks.ts`
 - Inputs/outputs:
@@ -229,6 +236,7 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
 - Purpose: operational configuration of workspace.
 - Responsibilities:
   - Profile settings connected to workspace API (`GET/PATCH /workspace/me`).
+  - WhatsApp channel setup/edit lifecycle via backend (`GET /channels/whatsapp`, `POST /channels/whatsapp`, `PATCH /channels/whatsapp/:id`).
   - Branding.
   - Team access.
   - Automation toggles.
@@ -245,10 +253,11 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
 Primary dependency flow in current product model:
 1. Public Marketing -> Auth -> Workspace.
 2. Workspace provides scope for Leads, Global Tasks Inbox, Conversations, Campaigns, Recovery, and Settings.
-3. Leads, Global Tasks Inbox, and Conversations feed Deal Probability and Recovery.
-4. Offer Optimization and Chatbot provide content/automation improvements for Conversations and Campaigns.
-5. Campaigns and Recovery outcomes feed Revenue Intelligence and Revenue Reports.
-6. Dashboard Overview aggregates outputs from Leads, Conversations, Recovery, Campaigns, and Revenue.
+3. Settings publishes channel configuration (including WhatsApp provider status) consumed by Leads and future Conversations runtime.
+4. Leads, Global Tasks Inbox, and Conversations feed Deal Probability and Recovery.
+5. Offer Optimization and Chatbot provide content/automation improvements for Conversations and Campaigns.
+6. Campaigns and Recovery outcomes feed Revenue Intelligence and Revenue Reports.
+7. Dashboard Overview aggregates outputs from Leads, Conversations, Recovery, Campaigns, and Revenue.
 
 ## 5) Shared cross-context UI infrastructure
 
@@ -270,4 +279,5 @@ Shared responsibilities:
 - Backend CORS currently whitelists `http://localhost:5173`; deployed frontend domain must be added in backend `FRONTEND_URL`.
 - Role-based route gating is still pending (only authenticated/guest guards are implemented).
 - No explicit cross-context store; most pages own local mock data, except Settings, Leads, and Global Tasks Inbox which now use React Query + dedicated backend services.
+- WhatsApp channel/messages endpoints can be temporarily unavailable during Railway incident windows; frontend now includes unavailable fallbacks to avoid UI breaks until backend deploy stabilizes.
 - Some text encoding artifacts appear in Spanish labels; should be normalized before production content freeze.

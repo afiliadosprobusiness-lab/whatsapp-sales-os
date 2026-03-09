@@ -48,10 +48,12 @@ Keep dashboard UI consistent using existing `ventrix-*` tokens, utilities, and c
 - Every backend-driven screen must include:
   - `loading`
   - `error`
+  - `unavailable` (for backend modules still pending deploy, e.g. `404/501/503/timeout`)
   - `empty`
   - `success`
 - Retry actions must be explicit on error states.
 - Mutations should provide immediate feedback via toast.
+- Unavailable state should use warning-style surface (`warning` tokens), never break layout, and keep a clear "Reintentar" action.
 
 ## 7) Accessibility Baseline
 - Use semantic table structure for tabular data.
@@ -61,3 +63,13 @@ Keep dashboard UI consistent using existing `ventrix-*` tokens, utilities, and c
 ## 8) Scope Notes
 - This document defines the current baseline only.
 - New modules should extend this baseline, not replace it.
+
+## 9) WhatsApp UI Pattern
+- Channel configuration in Settings should live inside Integraciones card with:
+  - provider/status badge
+  - compact form fields
+  - explicit unavailable feedback when backend endpoints are not ready.
+- Lead-detail WhatsApp timeline should:
+  - stay inside existing side panel (no separate inbox screen),
+  - differentiate inbound/outbound bubbles by alignment + surface color,
+  - include manual composer with loading/error/unavailable feedback.
