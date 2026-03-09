@@ -225,50 +225,17 @@ export default function InteractiveFunnel() {
 
   const renderHero = () => {
     return (
-      <section className="mx-auto flex min-h-[calc(100vh-190px)] w-full max-w-xl flex-col justify-between gap-8 px-1 pb-4 pt-2 text-center sm:min-h-[calc(100vh-210px)] sm:pt-5">
-        <div>
-          {funnelContent.hero.eyebrow ? (
-            <p className="inline-flex rounded-full bg-white/5 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-cyan-100 ring-1 ring-white/10">
-              {funnelContent.hero.eyebrow}
-            </p>
+      <section className="mx-auto flex min-h-[calc(100vh-190px)] w-full max-w-xl flex-col justify-between gap-10 px-1 pb-4 pt-10 text-center sm:min-h-[calc(100vh-210px)]">
+        <div className="space-y-3">
+          <h1 className="text-balance font-display text-4xl font-bold leading-[1.05] text-white sm:text-5xl">
+            {funnelContent.hero.title}
+          </h1>
+          {funnelContent.hero.resultHighlight ? (
+            <p className="text-xl font-semibold text-cyan-100 sm:text-2xl">{funnelContent.hero.resultHighlight}</p>
           ) : null}
-        </div>
-
-        <div className="space-y-6">
-          <div className="relative mx-auto w-full max-w-[300px]">
-            <div className="pointer-events-none absolute -inset-8 rounded-[2.6rem] bg-gradient-to-b from-cyan-300/20 via-sky-200/8 to-transparent blur-2xl" />
-            <div className="relative rounded-[2.1rem] bg-slate-950/70 p-3 shadow-[0_22px_58px_rgba(2,6,23,0.55)] ring-1 ring-white/12">
-              <div className="space-y-4 rounded-[1.65rem] bg-gradient-to-b from-slate-800/90 to-slate-900/90 p-4 text-left ring-1 ring-white/8">
-                <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.14em] text-slate-300">
-                  <span>WhatsSalesRecovery</span>
-                  <span>Live</span>
-                </div>
-                <div className="space-y-2.5 text-xs">
-                  <div className="rounded-xl bg-white/8 px-3 py-2 text-slate-100">
-                    Lead nuevo: quiere precio + envio hoy
-                  </div>
-                  <div className="rounded-xl bg-cyan-200/18 px-3 py-2 text-cyan-50">
-                    Seguimiento enviado con oferta y cierre en 20 min
-                  </div>
-                  <div className="rounded-xl bg-white/8 px-3 py-2 text-slate-100">
-                    Venta recuperada: US$180
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <h1 className="text-balance font-display text-4xl font-bold leading-[1.05] text-white sm:text-5xl">
-              {funnelContent.hero.title}
-            </h1>
-            {funnelContent.hero.resultHighlight ? (
-              <p className="text-xl font-semibold text-cyan-100 sm:text-2xl">{funnelContent.hero.resultHighlight}</p>
-            ) : null}
-            {funnelContent.hero.supportLine ? (
-              <p className="mx-auto max-w-sm text-sm text-slate-300 sm:text-base">{funnelContent.hero.supportLine}</p>
-            ) : null}
-          </div>
+          {funnelContent.hero.supportLine ? (
+            <p className="mx-auto max-w-sm text-sm text-slate-300 sm:text-base">{funnelContent.hero.supportLine}</p>
+          ) : null}
         </div>
 
         {renderPrimaryButton(funnelContent.hero.ctaLabel, goNextStep)}

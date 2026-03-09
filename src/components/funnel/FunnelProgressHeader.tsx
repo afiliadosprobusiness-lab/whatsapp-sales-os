@@ -13,11 +13,8 @@ export function FunnelProgressHeader({ currentStep, totalSteps, currentLabel }: 
   return (
     <header className="sticky top-0 z-30 bg-gradient-to-b from-slate-950/80 to-transparent backdrop-blur-sm">
       <div className="mx-auto w-full max-w-3xl px-4 pb-2 pt-3 sm:px-6">
-        <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="mb-3 flex items-center">
           <BrandLogo size="sm" className="border-cyan-300/20 bg-slate-950/60 shadow-none" />
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-300">
-            Paso {currentStep} de {totalSteps}
-          </p>
         </div>
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-800/90">
           <div
