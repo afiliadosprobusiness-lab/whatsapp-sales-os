@@ -26,7 +26,7 @@ export interface FunnelQuestionOption {
 export interface FunnelQuestion {
   id: string;
   prompt: string;
-  helper: string;
+  helper?: string;
   options: FunnelQuestionOption[];
 }
 
@@ -87,13 +87,22 @@ export interface FinalOfferContent {
 export interface FunnelContent {
   checkoutUrl: string;
   hero: {
-    eyebrow: string;
+    eyebrow?: string;
     title: string;
-    subtitle: string;
+    subtitle?: string;
+    resultHighlight?: string;
+    supportLine?: string;
     ctaLabel: string;
-    supportPoints: string[];
+    mockupTitle?: string;
+    mockupSubtitle?: string;
+    supportPoints?: string[];
   };
-  question: FunnelQuestion;
+  questionStep: {
+    title: string;
+    subtitle?: string;
+    helper?: string;
+    questions: FunnelQuestion[];
+  };
   reinforcement: {
     title: string;
     paragraph: string;

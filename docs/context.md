@@ -19,8 +19,10 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
 ### A) Public Qualification Funnel Context
 - Purpose: qualify traffic with a guided high-conversion flow and push intent users to checkout.
 - Responsibilities:
-  - Multi-step guided experience in mobile-first format.
+  - Multi-step guided experience in mobile-first format with premium dark visual direction.
+  - First screen uses a minimal conversion slide format (logo + progress + centered mockup + short value headline + single CTA).
   - Persistent progress state and step transitions.
+  - Five-question qualification filter aligned to WhatsApp sales-recovery ideal customer profile.
   - Answer capture for future scoring/personalization.
   - Video stage with gated CTA unlock by playback threshold/fallback timer.
   - Final offer + FAQ + checkout redirect.

@@ -95,7 +95,7 @@ export function FunnelVideoStep({
 
   return (
     <div className="space-y-5">
-      <div className="overflow-hidden rounded-2xl border border-slate-700/80 bg-slate-950/90 shadow-[0_20px_55px_rgba(2,6,23,0.55)]">
+      <div className="overflow-hidden rounded-3xl bg-slate-950/65 shadow-[0_20px_55px_rgba(2,6,23,0.45)] ring-1 ring-white/10">
         <div className="relative aspect-video">
           <video
             ref={videoRef}
@@ -122,27 +122,27 @@ export function FunnelVideoStep({
             <button
               type="button"
               onClick={handleStartPlayback}
-              className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-950/72 px-6 text-center transition-colors hover:bg-slate-950/64"
+              className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-950/68 px-6 text-center transition-colors hover:bg-slate-950/55"
             >
-              <PlayCircle className="h-14 w-14 text-cyan-200" />
-              <p className="text-base font-semibold text-white">Haz clic para escuchar la explicación completa</p>
+              <PlayCircle className="h-14 w-14 text-cyan-100" />
+              <p className="text-base font-semibold text-white">Haz click para escuchar la explicacion completa</p>
               <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.12em] text-cyan-200/85">
                 <Volume2 className="h-4 w-4" />
-                Activa el audio para captar el método completo
+                Activa el audio para captar el metodo completo
               </p>
             </button>
           ) : null}
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-700/70 bg-slate-900/80 p-4">
+      <div className="rounded-2xl bg-slate-950/45 p-4 ring-1 ring-white/10 backdrop-blur-sm">
         <div className="mb-2 flex items-center justify-between text-xs text-slate-300">
           <span>Progreso del video</span>
           <span>{Math.round(videoProgress)}%</span>
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-slate-800">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-emerald-300 to-cyan-300 transition-all duration-300"
+            className="h-full rounded-full bg-gradient-to-r from-emerald-200 to-cyan-200 transition-all duration-300"
             style={{ width: `${Math.min(100, Math.max(0, videoProgress))}%` }}
           />
         </div>
@@ -152,20 +152,20 @@ export function FunnelVideoStep({
         <button
           type="button"
           onClick={onContinue}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-300 to-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(45,212,191,0.35)]"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-200 via-cyan-200 to-sky-200 px-6 py-4 text-base font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(125,211,252,0.35)]"
         >
           <CheckCircle2 className="h-4 w-4" />
           Continuar con mi plan
         </button>
       ) : (
-        <div className="rounded-xl border border-slate-700/80 bg-slate-950/75 px-4 py-3 text-sm text-slate-300">
+        <div className="rounded-2xl bg-slate-950/40 px-4 py-3 text-sm text-slate-300 ring-1 ring-white/10">
           <p className="inline-flex items-center gap-2 text-amber-200">
             <Lock className="h-4 w-4" />
             El acceso al siguiente paso se habilita al avanzar en el video.
           </p>
           <p className="mt-1 text-xs text-slate-400">
-            Desbloqueo automático al llegar al {config.ctaRevealPercent}% o tras {config.fallbackRevealSeconds}s de
-            reproducción continua. Falta aprox. {lockedPercent}%.
+            Desbloqueo automatico al llegar al {config.ctaRevealPercent}% o tras {config.fallbackRevealSeconds}s de
+            reproduccion continua. Falta aprox. {lockedPercent}%.
           </p>
         </div>
       )}

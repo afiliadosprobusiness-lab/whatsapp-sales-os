@@ -1,14 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  ArrowRight,
-  CheckCircle2,
-  CircleDollarSign,
-  ShieldCheck,
-  Sparkles,
-  Star,
-  TrendingUp,
-} from "lucide-react";
+import { ArrowRight, CircleDollarSign, ShieldCheck, Star, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { FunnelProgressHeader } from "@/components/funnel/FunnelProgressHeader";
@@ -16,14 +8,16 @@ import { FunnelStepCard } from "@/components/funnel/FunnelStepCard";
 import { FunnelTransitionScreen } from "@/components/funnel/FunnelTransitionScreen";
 import { FunnelVideoStep } from "@/components/funnel/FunnelVideoStep";
 import { funnelContent, funnelSteps } from "@/data/funnel-content";
-import type { FunnelQuestionOption } from "@/types/funnel";
+import type { FunnelQuestion, FunnelQuestionOption } from "@/types/funnel";
 
 const FUNNEL_STORAGE_KEY = "wsr-interactive-funnel-v1";
 const QUALIFICATION_DELAY_MS = 1450;
+const QUESTION_ADVANCE_DELAY_MS = 160;
 const FINAL_LOADING_MS = 2800;
 
 interface StoredFunnelState {
   stepIndex: number;
+  questionIndex: number;
   answers: Record<string, string>;
   videoProgress: number;
   videoUnlocked: boolean;
@@ -35,10 +29,15 @@ const stepAnimation = {
   exit: { opacity: 0, y: -12, scale: 0.985 },
 };
 
+const primaryCtaClass =
+  "mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-200 via-cyan-200 to-sky-200 px-6 py-4 text-base font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_38px_rgba(125,211,252,0.35)]";
+
 export default function InteractiveFunnel() {
   const qualificationTimeoutRef = useRef<number | null>(null);
+  const questionAdvanceTimeoutRef = useRef<number | null>(null);
 
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [videoProgress, setVideoProgress] = useState(0);
   const [videoUnlocked, setVideoUnlocked] = useState(false);
@@ -48,21 +47,36 @@ export default function InteractiveFunnel() {
 
   const totalSteps = funnelSteps.length;
   const currentStep = funnelSteps[currentStepIndex];
-
-  const selectedQuestionOption = useMemo(
-    () => funnelContent.question.options.find((option) => option.id === answers[funnelContent.question.id]),
-    [answers],
-  );
+  const questions = funnelContent.questionStep.questions;
+  const currentQuestion = questions[currentQuestionIndex];
+  const currentQuestionAnswer = currentQuestion ? answers[currentQuestion.id] : undefined;
 
   const qualificationScore = useMemo(() => {
-    return Object.entries(answers).reduce((sum, [questionId, optionId]) => {
-      if (questionId !== funnelContent.question.id) {
-        return sum;
-      }
-      const option = funnelContent.question.options.find((item) => item.id === optionId);
-      return sum + (option?.scoreWeight ?? 0);
+    return questions.reduce((sum, question) => {
+      const selectedOptionId = answers[question.id];
+      const selectedOption = question.options.find((option) => option.id === selectedOptionId);
+      return sum + (selectedOption?.scoreWeight ?? 0);
     }, 0);
-  }, [answers]);
+  }, [answers, questions]);
+
+  const maxQualificationScore = useMemo(
+    () => questions.reduce((sum, question) => sum + Math.max(...question.options.map((option) => option.scoreWeight)), 0),
+    [questions],
+  );
+
+  const qualificationPercent = maxQualificationScore > 0 ? Math.round((qualificationScore / maxQualificationScore) * 100) : 0;
+  const answeredCount = useMemo(() => questions.filter((question) => Boolean(answers[question.id])).length, [answers, questions]);
+
+  const diagnosisSummary = useMemo(() => {
+    const answeredQuestions = questions.filter((question) => answers[question.id]);
+    const lastQuestion = answeredQuestions[answeredQuestions.length - 1];
+    if (!lastQuestion) {
+      return "Sin respuestas todavia";
+    }
+
+    const selectedOption = lastQuestion.options.find((option) => option.id === answers[lastQuestion.id]);
+    return selectedOption?.label ?? "Sin diagnostico";
+  }, [answers, questions]);
 
   useEffect(() => {
     const rawState = sessionStorage.getItem(FUNNEL_STORAGE_KEY);
@@ -74,6 +88,9 @@ export default function InteractiveFunnel() {
       const parsed = JSON.parse(rawState) as StoredFunnelState;
       if (typeof parsed.stepIndex === "number" && parsed.stepIndex >= 0 && parsed.stepIndex < totalSteps) {
         setCurrentStepIndex(parsed.stepIndex);
+      }
+      if (typeof parsed.questionIndex === "number") {
+        setCurrentQuestionIndex(Math.min(Math.max(parsed.questionIndex, 0), Math.max(questions.length - 1, 0)));
       }
       if (parsed.answers && typeof parsed.answers === "object") {
         setAnswers(parsed.answers);
@@ -87,17 +104,18 @@ export default function InteractiveFunnel() {
     } catch {
       sessionStorage.removeItem(FUNNEL_STORAGE_KEY);
     }
-  }, [totalSteps]);
+  }, [questions.length, totalSteps]);
 
   useEffect(() => {
     const state: StoredFunnelState = {
       stepIndex: currentStepIndex,
+      questionIndex: currentQuestionIndex,
       answers,
       videoProgress,
       videoUnlocked,
     };
     sessionStorage.setItem(FUNNEL_STORAGE_KEY, JSON.stringify(state));
-  }, [answers, currentStepIndex, videoProgress, videoUnlocked]);
+  }, [answers, currentQuestionIndex, currentStepIndex, videoProgress, videoUnlocked]);
 
   useEffect(() => {
     if (!isQualifying) {
@@ -140,6 +158,9 @@ export default function InteractiveFunnel() {
       if (qualificationTimeoutRef.current) {
         window.clearTimeout(qualificationTimeoutRef.current);
       }
+      if (questionAdvanceTimeoutRef.current) {
+        window.clearTimeout(questionAdvanceTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -147,12 +168,14 @@ export default function InteractiveFunnel() {
     setCurrentStepIndex((current) => Math.min(current + 1, totalSteps - 1));
   };
 
-  const handleQuestionAnswer = (option: FunnelQuestionOption) => {
-    setAnswers((current) => ({
-      ...current,
-      [funnelContent.question.id]: option.id,
-    }));
+  const renderPrimaryButton = (label: string, onClick: () => void) => (
+    <button type="button" onClick={onClick} className={primaryCtaClass}>
+      {label}
+      <ArrowRight className="h-4 w-4" />
+    </button>
+  );
 
+  const startQualificationTransition = () => {
     setQualificationProgress(12);
     setIsQualifying(true);
 
@@ -163,12 +186,34 @@ export default function InteractiveFunnel() {
     qualificationTimeoutRef.current = window.setTimeout(() => {
       setQualificationProgress(100);
       setIsQualifying(false);
+      setCurrentQuestionIndex(0);
       goNextStep();
     }, QUALIFICATION_DELAY_MS);
   };
 
+  const handleQuestionAnswer = (question: FunnelQuestion, option: FunnelQuestionOption) => {
+    setAnswers((current) => ({
+      ...current,
+      [question.id]: option.id,
+    }));
+
+    if (currentQuestionIndex < questions.length - 1) {
+      if (questionAdvanceTimeoutRef.current) {
+        window.clearTimeout(questionAdvanceTimeoutRef.current);
+      }
+
+      questionAdvanceTimeoutRef.current = window.setTimeout(() => {
+        setCurrentQuestionIndex((current) => Math.min(current + 1, questions.length - 1));
+      }, QUESTION_ADVANCE_DELAY_MS);
+      return;
+    }
+
+    startQualificationTransition();
+  };
+
   const resetFunnel = () => {
     setCurrentStepIndex(0);
+    setCurrentQuestionIndex(0);
     setAnswers({});
     setVideoProgress(0);
     setVideoUnlocked(false);
@@ -178,11 +223,106 @@ export default function InteractiveFunnel() {
     sessionStorage.removeItem(FUNNEL_STORAGE_KEY);
   };
 
+  const renderHero = () => {
+    return (
+      <section className="mx-auto flex min-h-[calc(100vh-190px)] w-full max-w-xl flex-col justify-between gap-8 px-1 pb-4 pt-2 text-center sm:min-h-[calc(100vh-210px)] sm:pt-5">
+        <div>
+          {funnelContent.hero.eyebrow ? (
+            <p className="inline-flex rounded-full bg-white/5 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-cyan-100 ring-1 ring-white/10">
+              {funnelContent.hero.eyebrow}
+            </p>
+          ) : null}
+        </div>
+
+        <div className="space-y-6">
+          <div className="relative mx-auto w-full max-w-[300px]">
+            <div className="pointer-events-none absolute -inset-8 rounded-[2.6rem] bg-gradient-to-b from-cyan-300/20 via-sky-200/8 to-transparent blur-2xl" />
+            <div className="relative rounded-[2.1rem] bg-slate-950/70 p-3 shadow-[0_22px_58px_rgba(2,6,23,0.55)] ring-1 ring-white/12">
+              <div className="space-y-4 rounded-[1.65rem] bg-gradient-to-b from-slate-800/90 to-slate-900/90 p-4 text-left ring-1 ring-white/8">
+                <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.14em] text-slate-300">
+                  <span>WhatsSalesRecovery</span>
+                  <span>Live</span>
+                </div>
+                <div className="space-y-2.5 text-xs">
+                  <div className="rounded-xl bg-white/8 px-3 py-2 text-slate-100">
+                    Lead nuevo: quiere precio + envio hoy
+                  </div>
+                  <div className="rounded-xl bg-cyan-200/18 px-3 py-2 text-cyan-50">
+                    Seguimiento enviado con oferta y cierre en 20 min
+                  </div>
+                  <div className="rounded-xl bg-white/8 px-3 py-2 text-slate-100">
+                    Venta recuperada: US$180
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <h1 className="text-balance font-display text-4xl font-bold leading-[1.05] text-white sm:text-5xl">
+              {funnelContent.hero.title}
+            </h1>
+            {funnelContent.hero.resultHighlight ? (
+              <p className="text-xl font-semibold text-cyan-100 sm:text-2xl">{funnelContent.hero.resultHighlight}</p>
+            ) : null}
+            {funnelContent.hero.supportLine ? (
+              <p className="mx-auto max-w-sm text-sm text-slate-300 sm:text-base">{funnelContent.hero.supportLine}</p>
+            ) : null}
+          </div>
+        </div>
+
+        {renderPrimaryButton(funnelContent.hero.ctaLabel, goNextStep)}
+      </section>
+    );
+  };
+
+  const renderQuestionStep = () => {
+    if (!currentQuestion) {
+      return null;
+    }
+
+    return (
+      <FunnelStepCard
+        title={currentQuestion.prompt}
+        subtitle={currentQuestion.helper ?? funnelContent.questionStep.helper}
+        className="bg-slate-950/40 shadow-[0_24px_60px_rgba(2,6,23,0.35)]"
+      >
+        <div className="mb-4 flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-300">
+          <span>
+            Pregunta {currentQuestionIndex + 1}/{questions.length}
+          </span>
+          <span>{answeredCount} respondidas</span>
+        </div>
+
+        <div className="space-y-3">
+          {currentQuestion.options.map((option) => {
+            const isSelected = currentQuestionAnswer === option.id;
+            return (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => handleQuestionAnswer(currentQuestion, option)}
+                className={`group w-full rounded-2xl px-5 py-4 text-left transition-all duration-200 ${
+                  isSelected
+                    ? "bg-cyan-300/18 ring-1 ring-cyan-200/60"
+                    : "bg-white/[0.04] ring-1 ring-white/10 hover:-translate-y-0.5 hover:bg-white/[0.08] hover:ring-cyan-100/35"
+                }`}
+              >
+                <p className="text-base font-semibold text-white">{option.label}</p>
+                <p className="mt-1 text-sm text-slate-300">{option.description}</p>
+              </button>
+            );
+          })}
+        </div>
+      </FunnelStepCard>
+    );
+  };
+
   const renderStep = () => {
     if (isQualifying && currentStep.id === "question") {
       return (
         <FunnelTransitionScreen
-          title="Analizando tu situación comercial..."
+          title="Analizando tu operacion comercial..."
           subtitle="Estamos ajustando la siguiente etapa para que sea 100% relevante para tu caso."
           progress={qualificationProgress}
         />
@@ -191,96 +331,32 @@ export default function InteractiveFunnel() {
 
     switch (currentStep.id) {
       case "hero":
-        return (
-          <FunnelStepCard
-            title={funnelContent.hero.title}
-            subtitle={funnelContent.hero.subtitle}
-            visual={
-              <div className="grid gap-3 rounded-2xl border border-cyan-300/30 bg-cyan-400/10 p-4 sm:grid-cols-3">
-                <div className="rounded-xl border border-slate-700/80 bg-slate-900/80 p-3">
-                  <p className="text-[11px] uppercase tracking-[0.12em] text-cyan-200">Ingreso recuperable</p>
-                  <p className="mt-1 text-2xl font-bold text-white">$12k+</p>
-                  <p className="text-xs text-emerald-200">potencial mensual en operaciones similares</p>
-                </div>
-                <div className="rounded-xl border border-slate-700/80 bg-slate-900/80 p-3">
-                  <p className="text-[11px] uppercase tracking-[0.12em] text-cyan-200">Tiempo de puesta en marcha</p>
-                  <p className="mt-1 text-2xl font-bold text-white">7 días</p>
-                  <p className="text-xs text-emerald-200">para tener una base operativa ejecutable</p>
-                </div>
-                <div className="rounded-xl border border-slate-700/80 bg-slate-900/80 p-3">
-                  <p className="text-[11px] uppercase tracking-[0.12em] text-cyan-200">Orientado a cierre</p>
-                  <p className="mt-1 text-2xl font-bold text-white">+Control</p>
-                  <p className="text-xs text-emerald-200">menos improvisación, más seguimiento efectivo</p>
-                </div>
-              </div>
-            }
-          >
-            <p className="inline-flex items-center gap-2 rounded-full border border-emerald-300/35 bg-emerald-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-200">
-              <Sparkles className="h-3.5 w-3.5" />
-              {funnelContent.hero.eyebrow}
-            </p>
-
-            <div className="mt-4 space-y-2">
-              {funnelContent.hero.supportPoints.map((point) => (
-                <p key={point} className="inline-flex items-start gap-2 text-sm text-slate-200">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
-                  {point}
-                </p>
-              ))}
-            </div>
-
-            <button
-              type="button"
-              onClick={goNextStep}
-              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-300 to-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(45,212,191,0.35)]"
-            >
-              {funnelContent.hero.ctaLabel}
-              <ArrowRight className="h-4 w-4" />
-            </button>
-          </FunnelStepCard>
-        );
+        return renderHero();
 
       case "question":
-        return (
-          <FunnelStepCard title={funnelContent.question.prompt} subtitle={funnelContent.question.helper}>
-            <div className="space-y-3">
-              {funnelContent.question.options.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => handleQuestionAnswer(option)}
-                  className="w-full rounded-2xl border border-slate-700/80 bg-slate-900/80 p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-cyan-300/55 hover:bg-slate-900"
-                >
-                  <p className="text-base font-semibold text-white">{option.label}</p>
-                  <p className="mt-1 text-sm text-slate-300">{option.description}</p>
-                </button>
-              ))}
-            </div>
-          </FunnelStepCard>
-        );
+        return renderQuestionStep();
 
       case "reinforcement":
         return (
-          <FunnelStepCard title={funnelContent.reinforcement.title} subtitle={funnelContent.reinforcement.paragraph}>
-            <div className="rounded-2xl border border-cyan-300/25 bg-cyan-400/10 p-4 text-sm text-cyan-100">
-              <p className="inline-flex items-center gap-2 font-semibold">
-                <TrendingUp className="h-4 w-4" />
-                Diagnóstico actual: {selectedQuestionOption?.label ?? "Sin respuesta"}
-              </p>
-              <p className="mt-2 text-cyan-100/90">
-                Puntaje de calificación inicial: {qualificationScore}/100. Esto se usará para personalizar versiones
-                futuras del funnel sin romper el flujo actual.
-              </p>
+          <FunnelStepCard title={funnelContent.reinforcement.title} subtitle={funnelContent.reinforcement.paragraph} centered>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl bg-white/[0.04] px-4 py-3 ring-1 ring-white/10">
+                <p className="text-[11px] uppercase tracking-[0.12em] text-slate-300">Fit estimado</p>
+                <p className="mt-1 text-2xl font-bold text-white">{qualificationPercent}%</p>
+              </div>
+              <div className="rounded-2xl bg-white/[0.04] px-4 py-3 ring-1 ring-white/10">
+                <p className="text-[11px] uppercase tracking-[0.12em] text-slate-300">Respuestas</p>
+                <p className="mt-1 text-2xl font-bold text-white">{answeredCount}/5</p>
+              </div>
+              <div className="rounded-2xl bg-cyan-200/12 px-4 py-3 ring-1 ring-cyan-200/25">
+                <p className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.12em] text-cyan-100">
+                  <TrendingUp className="h-3.5 w-3.5" />
+                  Diagnostico
+                </p>
+                <p className="mt-1 text-sm font-medium text-white">{diagnosisSummary}</p>
+              </div>
             </div>
-
-            <button
-              type="button"
-              onClick={goNextStep}
-              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-300 to-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(45,212,191,0.35)]"
-            >
-              {funnelContent.reinforcement.ctaLabel}
-              <ArrowRight className="h-4 w-4" />
-            </button>
+            {renderPrimaryButton(funnelContent.reinforcement.ctaLabel, goNextStep)}
           </FunnelStepCard>
         );
 
@@ -301,63 +377,32 @@ export default function InteractiveFunnel() {
       case "authority":
         return (
           <FunnelStepCard title={funnelContent.authority.title} subtitle={funnelContent.authority.subtitle}>
-            <div className="rounded-2xl border border-slate-700/70 bg-slate-900/80 p-4">
-              <div className="mb-3 flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-cyan-300/40 bg-cyan-400/15 font-display text-lg font-bold text-cyan-100">
-                  WR
-                </div>
-                <div>
-                  <p className="font-semibold text-white">Equipo WhatsSalesRecovery</p>
-                  <p className="text-xs text-slate-300">Especialistas en conversión comercial por WhatsApp</p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                {funnelContent.authority.bullets.map((bullet) => (
-                  <p key={bullet} className="inline-flex items-start gap-2 text-sm text-slate-200">
-                    <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
-                    {bullet}
-                  </p>
-                ))}
-              </div>
+            <div className="space-y-3">
+              {funnelContent.authority.bullets.map((bullet) => (
+                <p key={bullet} className="inline-flex items-start gap-2 text-sm text-slate-200">
+                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-200" />
+                  {bullet}
+                </p>
+              ))}
             </div>
-
-            <button
-              type="button"
-              onClick={goNextStep}
-              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-300 to-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(45,212,191,0.35)]"
-            >
-              Continuar
-              <ArrowRight className="h-4 w-4" />
-            </button>
+            {renderPrimaryButton("Continuar", goNextStep)}
           </FunnelStepCard>
         );
 
       case "program":
         return (
           <FunnelStepCard title={funnelContent.program.title} subtitle={funnelContent.program.subtitle}>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {funnelContent.program.modules.map((module) => (
-                <article
-                  key={module.title}
-                  className="rounded-2xl border border-slate-700/70 bg-slate-900/80 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
-                >
+                <article key={module.title} className="relative pl-5">
+                  <span className="absolute left-0 top-1 h-[calc(100%-0.25rem)] w-[2px] rounded-full bg-gradient-to-b from-cyan-200 to-emerald-200" />
                   <h3 className="text-base font-semibold text-white">{module.title}</h3>
                   <p className="mt-1 text-sm text-slate-300">{module.description}</p>
-                  <p className="mt-3 rounded-lg border border-cyan-300/25 bg-cyan-400/10 px-3 py-2 text-xs text-cyan-100">
-                    Resultado esperado: {module.result}
-                  </p>
+                  <p className="mt-2 text-xs uppercase tracking-[0.1em] text-cyan-100">Resultado: {module.result}</p>
                 </article>
               ))}
             </div>
-
-            <button
-              type="button"
-              onClick={goNextStep}
-              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-300 to-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(45,212,191,0.35)]"
-            >
-              Quiero los bonos
-              <ArrowRight className="h-4 w-4" />
-            </button>
+            {renderPrimaryButton("Quiero los bonos", goNextStep)}
           </FunnelStepCard>
         );
 
@@ -366,47 +411,29 @@ export default function InteractiveFunnel() {
           <FunnelStepCard title={funnelContent.bonuses.title} subtitle={funnelContent.bonuses.subtitle}>
             <div className="space-y-3">
               {funnelContent.bonuses.items.map((bonus) => (
-                <article key={bonus.name} className="rounded-2xl border border-slate-700/70 bg-slate-900/80 p-4">
+                <article key={bonus.name} className="rounded-2xl bg-white/[0.04] px-4 py-4 ring-1 ring-white/10">
                   <p className="text-base font-semibold text-white">{bonus.name}</p>
                   <p className="mt-1 text-sm text-slate-300">{bonus.description}</p>
-                  <p className="mt-3 inline-flex rounded-full border border-emerald-300/35 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-200">
-                    {bonus.value}
-                  </p>
+                  <p className="mt-2 text-xs font-medium uppercase tracking-[0.1em] text-emerald-200">{bonus.value}</p>
                 </article>
               ))}
             </div>
-
-            <button
-              type="button"
-              onClick={goNextStep}
-              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-300 to-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(45,212,191,0.35)]"
-            >
-              Seguir con mi acceso
-              <ArrowRight className="h-4 w-4" />
-            </button>
+            {renderPrimaryButton("Seguir con mi acceso", goNextStep)}
           </FunnelStepCard>
         );
 
       case "objections":
         return (
           <FunnelStepCard title={funnelContent.objections.title} subtitle={funnelContent.objections.subtitle}>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {funnelContent.objections.items.map((item) => (
-                <article key={item.title} className="rounded-2xl border border-slate-700/70 bg-slate-900/80 p-4">
+                <article key={item.title} className="pb-4 border-b border-white/10 last:border-b-0 last:pb-0">
                   <h3 className="text-base font-semibold text-white">{item.title}</h3>
                   <p className="mt-1 text-sm text-slate-300">{item.detail}</p>
                 </article>
               ))}
             </div>
-
-            <button
-              type="button"
-              onClick={goNextStep}
-              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-300 to-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(45,212,191,0.35)]"
-            >
-              Ver casos reales
-              <ArrowRight className="h-4 w-4" />
-            </button>
+            {renderPrimaryButton("Ver casos reales", goNextStep)}
           </FunnelStepCard>
         );
 
@@ -416,29 +443,18 @@ export default function InteractiveFunnel() {
             <div className="overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <div className="flex w-max gap-3 pr-2">
                 {funnelContent.socialProof.testimonials.map((testimonial) => (
-                  <article
-                    key={testimonial.name}
-                    className="w-[280px] rounded-2xl border border-slate-700/80 bg-slate-900/82 p-4 shadow-[0_14px_32px_rgba(2,6,23,0.45)]"
-                  >
+                  <article key={testimonial.name} className="w-[290px] rounded-2xl bg-white/[0.04] p-4 ring-1 ring-white/12">
                     <p className="text-sm text-slate-200">"{testimonial.quote}"</p>
                     <p className="mt-4 text-base font-semibold text-white">{testimonial.name}</p>
                     <p className="text-xs text-slate-300">{testimonial.role}</p>
-                    <p className="mt-3 inline-flex rounded-full border border-cyan-300/30 bg-cyan-400/10 px-3 py-1 text-xs text-cyan-100">
+                    <p className="mt-3 text-xs font-medium uppercase tracking-[0.1em] text-cyan-100">
                       {testimonial.result}
                     </p>
                   </article>
                 ))}
               </div>
             </div>
-
-            <button
-              type="button"
-              onClick={goNextStep}
-              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-300 to-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(45,212,191,0.35)]"
-            >
-              Ver oferta final
-              <ArrowRight className="h-4 w-4" />
-            </button>
+            {renderPrimaryButton("Ver oferta final", goNextStep)}
           </FunnelStepCard>
         );
 
@@ -454,8 +470,8 @@ export default function InteractiveFunnel() {
       case "finalOffer":
         return (
           <FunnelStepCard title={funnelContent.finalOffer.title} subtitle={funnelContent.finalOffer.subtitle}>
-            <div className="rounded-2xl border border-emerald-300/25 bg-emerald-400/10 p-4">
-              <p className="text-xs uppercase tracking-[0.14em] text-emerald-100">Inversión hoy</p>
+            <div className="rounded-2xl bg-emerald-200/10 p-4 ring-1 ring-emerald-200/30">
+              <p className="text-xs uppercase tracking-[0.14em] text-emerald-100">Inversion hoy</p>
               <div className="mt-2 flex items-end gap-2">
                 <span className="text-2xl text-slate-400 line-through">{funnelContent.finalOffer.oldPrice}</span>
                 <span className="font-display text-4xl font-bold text-white">{funnelContent.finalOffer.currentPrice}</span>
@@ -466,29 +482,29 @@ export default function InteractiveFunnel() {
             <div className="mt-4 space-y-2">
               {funnelContent.finalOffer.includes.map((item) => (
                 <p key={item} className="inline-flex items-start gap-2 text-sm text-slate-200">
-                  <CircleDollarSign className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
+                  <CircleDollarSign className="mt-0.5 h-4 w-4 shrink-0 text-emerald-200" />
                   {item}
                 </p>
               ))}
             </div>
 
-            <p className="mt-4 rounded-xl border border-cyan-300/25 bg-cyan-400/10 px-3 py-2 text-xs text-cyan-100">
+            <p className="mt-4 rounded-xl bg-cyan-200/12 px-3 py-2 text-xs text-cyan-100 ring-1 ring-cyan-200/25">
               {funnelContent.finalOffer.guarantee}
             </p>
 
             <a
               href={funnelContent.checkoutUrl}
-              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-300 to-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(45,212,191,0.35)]"
+              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-200 via-cyan-200 to-sky-200 px-6 py-4 text-base font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(125,211,252,0.35)]"
             >
               <Star className="h-4 w-4" />
               Ir al checkout seguro
             </a>
 
-            <div className="mt-6 rounded-2xl border border-slate-700/75 bg-slate-900/82 px-4">
+            <div className="mt-6 rounded-2xl bg-slate-950/40 px-4 ring-1 ring-white/10">
               <p className="pt-4 text-sm font-semibold text-white">Preguntas frecuentes</p>
               <Accordion type="single" collapsible>
                 {funnelContent.faq.map((faq, index) => (
-                  <AccordionItem key={faq.question} value={`faq-${index}`} className="border-slate-700/70">
+                  <AccordionItem key={faq.question} value={`faq-${index}`} className="border-white/10">
                     <AccordionTrigger className="text-left text-sm text-slate-100 hover:no-underline">
                       {faq.question}
                     </AccordionTrigger>
@@ -500,10 +516,10 @@ export default function InteractiveFunnel() {
 
             <div className="mt-4 flex flex-col gap-2 text-center text-xs text-slate-400">
               <button type="button" onClick={resetFunnel} className="underline underline-offset-4 hover:text-slate-200">
-                Reiniciar evaluación
+                Reiniciar evaluacion
               </button>
               <Link to="/landing" className="underline underline-offset-4 hover:text-slate-200">
-                Ver landing clásica
+                Ver landing clasica
               </Link>
             </div>
           </FunnelStepCard>
@@ -516,21 +532,17 @@ export default function InteractiveFunnel() {
 
   return (
     <div className="funnel-root-bg relative min-h-screen overflow-x-hidden text-slate-100">
-      <div className="funnel-grid-overlay pointer-events-none absolute inset-0 opacity-45" />
+      <div className="funnel-grid-overlay pointer-events-none absolute inset-0" />
       <div className="funnel-orb funnel-orb-primary pointer-events-none" />
       <div className="funnel-orb funnel-orb-secondary pointer-events-none" />
       <div className="funnel-orb funnel-orb-tertiary pointer-events-none" />
 
-      <FunnelProgressHeader
-        currentStep={currentStepIndex + 1}
-        totalSteps={totalSteps}
-        currentLabel={currentStep.label}
-      />
+      <FunnelProgressHeader currentStep={currentStepIndex + 1} totalSteps={totalSteps} currentLabel={currentStep.label} />
 
       <main className="relative z-10 mx-auto w-full max-w-3xl px-4 pb-16 pt-6 sm:px-6">
         <AnimatePresence mode="wait">
           <motion.div
-            key={isQualifying ? "qualifying" : currentStep.id}
+            key={isQualifying ? "qualifying" : `${currentStep.id}-${currentQuestionIndex}`}
             variants={stepAnimation}
             initial="initial"
             animate="animate"

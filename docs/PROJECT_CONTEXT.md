@@ -12,8 +12,11 @@
 - Funnel content is centralized in `src/data/funnel-content.ts`.
 - Funnel types and extensibility hooks live in `src/types/funnel.ts`.
 - Reusable funnel UI blocks live in `src/components/funnel/*`.
+- Funnel starts with a minimal hero slide optimized for conversion (small top logo/progress, centered mockup, short economic value headline, one CTA).
+- Qualification flow now runs through 5 sequential filter questions focused on WhatsApp sales maturity and follow-up loss signals.
 - Funnel runtime state:
   - `currentStepIndex`
+  - `currentQuestionIndex`
   - `answers`
   - `qualificationScore` (derived)
   - `videoProgress`
