@@ -64,7 +64,24 @@ Keep dashboard UI consistent using existing `ventrix-*` tokens, utilities, and c
 - This document defines the current baseline only.
 - New modules should extend this baseline, not replace it.
 
-## 9) WhatsApp UI Pattern
+## 9) Interactive Funnel Pattern
+- Public home funnel (`/`) follows a dark premium, mobile-first conversion style.
+- Visual language:
+  - gradients + glow accents with high-contrast typography.
+  - large tap targets and card-based choices.
+  - sticky progress header during all funnel steps.
+- Core funnel-specific classes:
+  - `funnel-root-bg`
+  - `funnel-grid-overlay`
+  - `funnel-orb*`
+- Recommended funnel composition order:
+  - Hero -> question -> reinforcement -> video (gated CTA) -> authority -> program -> bonuses -> objections -> social proof -> loading transition -> final offer + FAQ.
+- Interaction rules:
+  - step transitions should be smooth (`fade/slide`), not abrupt.
+  - video CTA must stay hidden until playback threshold or fallback time is reached.
+  - keep future scoring/personalization hooks in state, even if current flow does not branch.
+
+## 10) WhatsApp UI Pattern
 - Channel configuration in Settings should live inside Integraciones card with:
   - provider/status badge
   - compact form fields

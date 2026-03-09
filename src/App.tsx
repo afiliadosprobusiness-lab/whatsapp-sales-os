@@ -7,6 +7,7 @@ import { AuthProvider } from "@/lib/session";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Landing from "./pages/Landing";
+import InteractiveFunnel from "./pages/InteractiveFunnel";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
@@ -34,7 +35,8 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Landing />} />
+            <Route path="/" element={<InteractiveFunnel />} />
+            <Route path="/landing" element={<Landing />} />
 
             <Route element={<RequireGuest />}>
               <Route path="/login" element={<Login />} />

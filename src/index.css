@@ -334,6 +334,58 @@
   .wsr-marquee-track:hover {
     animation-play-state: paused;
   }
+
+  .funnel-root-bg {
+    background:
+      radial-gradient(circle at 14% 16%, rgba(16, 185, 129, 0.19), transparent 33%),
+      radial-gradient(circle at 86% 12%, rgba(56, 189, 248, 0.18), transparent 31%),
+      radial-gradient(circle at 48% 86%, rgba(14, 165, 233, 0.14), transparent 41%),
+      linear-gradient(160deg, #020617 0%, #020b16 36%, #031728 100%);
+  }
+
+  .funnel-grid-overlay {
+    background-image:
+      linear-gradient(to right, hsl(210 40% 60% / 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(210 40% 60% / 0.08) 1px, transparent 1px);
+    background-size: 34px 34px;
+    mask-image: radial-gradient(circle at center, black 25%, transparent 90%);
+    -webkit-mask-image: radial-gradient(circle at center, black 25%, transparent 90%);
+  }
+
+  .funnel-orb {
+    position: absolute;
+    z-index: 0;
+    border-radius: 9999px;
+    filter: blur(58px);
+    opacity: 0.65;
+    animation: funnel-orb-float 13s ease-in-out infinite;
+  }
+
+  .funnel-orb-primary {
+    left: -6rem;
+    top: 4rem;
+    height: 17rem;
+    width: 17rem;
+    background: rgba(16, 185, 129, 0.24);
+  }
+
+  .funnel-orb-secondary {
+    right: -7rem;
+    top: 10rem;
+    height: 18rem;
+    width: 18rem;
+    animation-delay: 1.6s;
+    background: rgba(56, 189, 248, 0.24);
+  }
+
+  .funnel-orb-tertiary {
+    bottom: 4rem;
+    left: 34%;
+    height: 16rem;
+    width: 16rem;
+    animation-delay: 2.4s;
+    background: rgba(14, 165, 233, 0.2);
+  }
 }
 
 @keyframes wsr-marquee-left {
@@ -361,5 +413,15 @@
   }
   50% {
     transform: translate3d(0, -10px, 0) scale(1.04);
+  }
+}
+
+@keyframes funnel-orb-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(0, -12px, 0) scale(1.06);
   }
 }

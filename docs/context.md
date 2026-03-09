@@ -16,18 +16,35 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
 
 ## 3) Context inventory
 
-### A) Public Marketing Context
-- Purpose: communicate value proposition and drive account creation.
+### A) Public Qualification Funnel Context
+- Purpose: qualify traffic with a guided high-conversion flow and push intent users to checkout.
 - Responsibilities:
-  - Landing narrative (problem, solution, features, use cases, CTA).
+  - Multi-step guided experience in mobile-first format.
+  - Persistent progress state and step transitions.
+  - Answer capture for future scoring/personalization.
+  - Video stage with gated CTA unlock by playback threshold/fallback timer.
+  - Final offer + FAQ + checkout redirect.
+- Main screens/components:
+  - `src/pages/InteractiveFunnel.tsx`
+  - `src/components/funnel/*`
+  - `src/data/funnel-content.ts`
+  - `src/types/funnel.ts`
+- Inputs/outputs:
+  - Input: anonymous visit.
+  - Output: funnel progression and checkout redirect.
+
+### B) Legacy Landing Context
+- Purpose: keep previous marketing landing available as secondary route and support classic CTA navigation.
+- Responsibilities:
+  - Legacy hero/features/testimonials narrative.
   - Conversion to auth routes.
 - Main screens/components:
   - `src/pages/Landing.tsx`
 - Inputs/outputs:
-  - Input: anonymous visit.
+  - Input: anonymous visit to `/landing`.
   - Output: navigate to `/login` or `/register`.
 
-### B) Auth Context
+### C) Auth Context
 - Purpose: user sign-in and account registration entry point.
 - Responsibilities:
   - Login and register forms with `idle | loading | success | error | unauthorized` status handling.
@@ -46,7 +63,7 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
   - Input: credentials/profile fields.
   - Output: authenticated user context for UI, route to private modules, logout to `/login`.
 
-### C) Workspace and Access Context
+### D) Workspace and Access Context
 - Purpose: represent account scope, members, and business profile.
 - Responsibilities:
   - Workspace identity in topbar.
@@ -60,7 +77,7 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
   - Input: profile updates, role updates, invites.
   - Output: workspace-level configuration used across all operational contexts.
 
-### D) Dashboard Overview Context
+### E) Dashboard Overview Context
 - Purpose: central operational snapshot.
 - Responsibilities:
   - Aggregate KPIs from leads, conversations, recovery, campaigns, and revenue.
@@ -71,7 +88,7 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
   - Input: cross-context metrics.
   - Output: summary for daily prioritization.
 
-### E) Leads Context
+### F) Leads Context
 - Purpose: manage lead pipeline and per-lead qualification.
 - Responsibilities:
   - Pipeline stage visibility and real workspace lead listing.
@@ -101,7 +118,7 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
   - Input: lead attributes, filters, assignment, manual notes.
   - Output: prioritized lead set consumed by Conversations/Recovery/Campaigns/Deal Probability.
 
-### F) Global Tasks Inbox Context
+### G) Global Tasks Inbox Context
 - Purpose: operate all follow-up tasks of the workspace from one queue.
 - Responsibilities:
   - Fetch global follow-up list from backend (`GET /tasks`).
@@ -117,7 +134,7 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
   - Input: workspace task backlog and status updates.
   - Output: daily follow-up execution queue for sales operators.
 
-### G) Conversations Context
+### H) Conversations Context
 - Purpose: operate active WhatsApp-like conversations tied to leads.
 - Responsibilities:
   - Conversation list and unread tracking.
@@ -130,7 +147,7 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
   - Input: messages, thread actions, assignment state.
   - Output: conversation events and engagement signals for scoring/recovery/revenue.
 
-### H) Chatbot Context
+### I) Chatbot Context
 - Purpose: configure AI assistant behavior in sales conversations.
 - Responsibilities:
   - Assistant name/objective/tone/rules.
@@ -143,7 +160,7 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
   - Input: config and trigger toggles.
   - Output: automated bot behavior consumed by Conversations and Recovery.
 
-### I) Recovery Context
+### J) Recovery Context
 - Purpose: reactivate cold leads and abandoned conversations.
 - Responsibilities:
   - Detect recoverable leads.
@@ -156,7 +173,7 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
   - Input: inactivity/risk signals from Leads/Conversations.
   - Output: recovered leads and revenue impact consumed by Dashboard/Revenue modules.
 
-### J) Campaigns Context
+### K) Campaigns Context
 - Purpose: orchestrate outbound campaigns and measure impact.
 - Responsibilities:
   - Campaign CRUD status flow (draft/active/paused/completed).
@@ -169,7 +186,7 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
   - Input: target segment definitions and campaign content.
   - Output: sends, responses, recovered leads/revenue.
 
-### K) Imports Context
+### L) Imports Context
 - Purpose: bootstrap or enrich lead data from CSV/XLSX.
 - Responsibilities:
   - File intake.
@@ -182,7 +199,7 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
   - Input: source file and mapping config.
   - Output: lead records for Leads/Campaigns/Recovery.
 
-### L) Deal Probability Context
+### M) Deal Probability Context
 - Purpose: scoring and opportunity ranking.
 - Responsibilities:
   - Assign probability scores.
@@ -195,7 +212,7 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
   - Input: lead attributes + conversation behavior signals.
   - Output: actionable ranking consumed by Leads, Dashboard, Campaign targeting.
 
-### M) Offer Optimization Context
+### N) Offer Optimization Context
 - Purpose: improve sales copy quality and conversion potential.
 - Responsibilities:
   - Analyze current sales messages.
@@ -207,7 +224,7 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
   - Input: raw copy/message snippets.
   - Output: optimized templates used by Conversations/Chatbot/Campaigns/Recovery.
 
-### N) Revenue Intelligence Context
+### O) Revenue Intelligence Context
 - Purpose: diagnose revenue patterns and opportunities.
 - Responsibilities:
   - Revenue KPIs and flow visualization.
@@ -219,7 +236,7 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
   - Input: campaign/lead/conversation outcomes.
   - Output: optimization priorities for operations and strategy.
 
-### O) Revenue Reporting Context
+### P) Revenue Reporting Context
 - Purpose: periodic and exportable business reporting.
 - Responsibilities:
   - Time-range report views.
@@ -232,7 +249,7 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
   - Input: aggregated transactional performance data.
   - Output: historical reports for management and billing alignment.
 
-### P) Platform Settings Context
+### Q) Platform Settings Context
 - Purpose: operational configuration of workspace.
 - Responsibilities:
   - Profile settings connected to workspace API (`GET/PATCH /workspace/me`).
@@ -251,13 +268,14 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
 ## 4) Relations between contexts
 
 Primary dependency flow in current product model:
-1. Public Marketing -> Auth -> Workspace.
-2. Workspace provides scope for Leads, Global Tasks Inbox, Conversations, Campaigns, Recovery, and Settings.
-3. Settings publishes channel configuration (including WhatsApp provider status) consumed by Leads and future Conversations runtime.
-4. Leads, Global Tasks Inbox, and Conversations feed Deal Probability and Recovery.
-5. Offer Optimization and Chatbot provide content/automation improvements for Conversations and Campaigns.
-6. Campaigns and Recovery outcomes feed Revenue Intelligence and Revenue Reports.
-7. Dashboard Overview aggregates outputs from Leads, Conversations, Recovery, Campaigns, and Revenue.
+1. Public Qualification Funnel (`/`) -> Checkout intent.
+2. Legacy Landing (`/landing`) -> Auth (`/login`, `/register`) -> Workspace.
+3. Workspace provides scope for Leads, Global Tasks Inbox, Conversations, Campaigns, Recovery, and Settings.
+4. Settings publishes channel configuration (including WhatsApp provider status) consumed by Leads and future Conversations runtime.
+5. Leads, Global Tasks Inbox, and Conversations feed Deal Probability and Recovery.
+6. Offer Optimization and Chatbot provide content/automation improvements for Conversations and Campaigns.
+7. Campaigns and Recovery outcomes feed Revenue Intelligence and Revenue Reports.
+8. Dashboard Overview aggregates outputs from Leads, Conversations, Recovery, Campaigns, and Revenue.
 
 ## 5) Shared cross-context UI infrastructure
 
@@ -266,6 +284,7 @@ Shared layout/runtime components:
 - `src/components/AppSidebar.tsx` (module navigation)
 - `src/components/DashboardTopbar.tsx` (global quick actions)
 - `src/index.css` design tokens and utility classes (`ventrix-*`)
+- `src/index.css` marketing utilities (`wsr-*`, `funnel-*`)
 
 Shared responsibilities:
 - Global navigation consistency.
@@ -276,6 +295,8 @@ Shared responsibilities:
 
 - Auth is integrated against production backend (`https://backend-production-80db.up.railway.app`) through `VITE_API_URL` (fallback `VITE_API_BASE_URL`).
 - No token or sensitive session data is persisted in `localStorage`; intended production strategy is cookie httpOnly + `GET /auth/me`.
+- Interactive funnel state persists only in `sessionStorage` (`wsr-interactive-funnel-v1`) for lightweight recovery.
+- Funnel checkout destination is configurable using `VITE_FUNNEL_CHECKOUT_URL` (fallback constant in `src/data/funnel-content.ts`).
 - Backend CORS currently whitelists `http://localhost:5173`; deployed frontend domain must be added in backend `FRONTEND_URL`.
 - Role-based route gating is still pending (only authenticated/guest guards are implemented).
 - No explicit cross-context store; most pages own local mock data, except Settings, Leads, and Global Tasks Inbox which now use React Query + dedicated backend services.

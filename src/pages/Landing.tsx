@@ -174,7 +174,7 @@ export default function Landing() {
 
       <nav className="fixed inset-x-0 top-4 z-50 px-4 md:px-6">
         <div className="wsr-nav-shell mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6">
-          <Link to="/" className="flex items-center">
+          <Link to="/landing" className="flex items-center">
             <BrandLogo size="sm" />
           </Link>
           <div className="hidden items-center gap-8 text-sm text-slate-300 lg:flex">

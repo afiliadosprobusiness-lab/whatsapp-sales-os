@@ -5,6 +5,7 @@ This document describes functional and structural contracts inferred from the cu
 
 Current status in codebase:
 - SPA with React + React Router.
+- Public index route now serves an interactive qualification funnel (quiz + VSL style flow) instead of the legacy static landing.
 - All domain screens exist as routes.
 - Most domain screens still render static/mock data (local arrays inside page components), except Auth, Workspace Settings, and Leads.
 - Auth module is integrated to production API with cookie session.
@@ -19,7 +20,8 @@ Current status in codebase:
 - `@tanstack/react-query` is configured globally and is now used by Settings business profile integration.
 
 Routes implemented:
-- `/` Landing
+- `/` Interactive qualification funnel
+- `/landing` Legacy landing
 - `/login` Login
 - `/register` Register
 - `/dashboard` Overview
@@ -40,7 +42,8 @@ Routes implemented:
 
 | Module | Route | Main visible structures |
 |---|---|---|
-| Landing | `/` | Hero, feature cards, process steps, use-case cards, CTA sections |
+| Interactive Funnel | `/` | Multi-step guided flow, persistent progress bar, quiz question cards, reinforcement step, gated video CTA, authority/program/bonuses/objection/social-proof/final-offer steps, loading transitions, configurable checkout CTA |
+| Landing (legacy) | `/landing` | Hero, feature cards, process steps, use-case cards, CTA sections |
 | Auth | `/login`, `/register` | Two-panel auth layout, credential forms, social auth button |
 | Dashboard Overview | `/dashboard` | KPI metric cards, mock chart, insights cards, leads table, activity feed, alert widgets |
 | Leads | `/leads` | Pipeline stage cards, lead table, filters, detail side panel |
@@ -285,6 +288,27 @@ Contract:
 - Expected error envelope:
   - `{ data: null, error: { code, message, details?.fieldErrors? } }`
 
+### 8.0 Public Funnel (Marketing Qualification)
+UI evidence:
+- Guided mobile-first sequence with step transitions and top progress state.
+- Quiz-like question flow with answer capture and future scoring-ready structure.
+- Video step where CTA unlock is conditioned by playback progress threshold or fallback timed playback.
+- Final offer with FAQ and checkout redirect URL configurable through frontend env (`VITE_FUNNEL_CHECKOUT_URL`) or funnel content constants.
+
+Contract:
+- No backend contract required in this version (frontend-only state machine).
+- State model for future extension:
+  - `currentStepIndex`
+  - `answers: Record<string,string>`
+  - `qualificationScore`
+  - `videoProgress`
+  - `videoUnlocked`
+- Lightweight persistence:
+  - `sessionStorage` key: `wsr-interactive-funnel-v1`
+- Routing contract:
+  - `/` interactive funnel
+  - `/landing` legacy landing retained for secondary access
+
 ### 8.2 Users / Workspace
 UI evidence:
 - Workspace switcher in topbar (`Mi Tienda Online`).
@@ -471,6 +495,7 @@ Contract:
 - `App.css` keeps Vite template styles and appears unused by current pages.
 - UTF-8/encoding artifacts are visible in multiple Spanish strings.
 - Domain logic is still UI-only in modules not yet integrated (Conversations, Recovery, Campaigns, Revenue, etc.), while Settings profile/WhatsApp channel, Leads (including WhatsApp manual messaging), and global Tasks Inbox are connected.
+- Funnel qualification currently does not branch users to different outcomes; all answers continue to the same final offer while preserving answer/score hooks for future personalization.
 
 ## 11) Contract changelog
 
@@ -483,3 +508,4 @@ Contract:
 | 2026-03-08 | Lead tasks contract connected in lead detail (`/leads/:id/tasks` GET/POST, `/tasks/:id` PATCH, `/tasks/:id/status` PATCH) with loading/error/empty states and post-mutation refresh. | non-breaking | Lead detail now supports real follow-up reminder listing, basic editing, and done/pending status updates without local mocks. |
 | 2026-03-08 | Global tasks inbox contract connected (`/tasks` GET, optional `/tasks/summary` GET, optional `/tasks/:id/status` PATCH) with workspace-wide filters and lead navigation support. | non-breaking | Operators can now run follow-up execution from one global queue without leaving dashboard scope. |
 | 2026-03-09 | WhatsApp frontend contract connected to backend-owned channel + lead messaging (`GET/POST/PATCH /channels/whatsapp`, `POST /leads/:id/messages`, message view derived from `GET /leads/:id/activity`) with graceful handling for `404/501/503/timeout` during Railway incident windows. | non-breaking | CRM now exposes WhatsApp setup and manual messaging UX without direct provider calls; features auto-activate when backend deploy finishes. |
+| 2026-03-09 | Public index route migrated from static landing to interactive qualification funnel (`/`) with persistent progress, answer capture, gated video CTA, transition screens, and final checkout flow; legacy landing moved to `/landing`. | non-breaking | Marketing entry now uses guided conversion flow while keeping previous landing available as secondary route. |

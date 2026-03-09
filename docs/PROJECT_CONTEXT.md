@@ -4,7 +4,26 @@
 - Vite + React 18 + TypeScript.
 - React Router for SPA routing.
 - Tailwind + custom `ventrix-*` utility classes.
+- Framer Motion for funnel transitions and animated step changes.
 - `@tanstack/react-query` configured globally (already used in Settings workspace profile, WhatsApp channel, Leads, lead messaging, and global tasks).
+
+## Current Public Funnel Architecture
+- Public home (`/`) now renders `src/pages/InteractiveFunnel.tsx`.
+- Funnel content is centralized in `src/data/funnel-content.ts`.
+- Funnel types and extensibility hooks live in `src/types/funnel.ts`.
+- Reusable funnel UI blocks live in `src/components/funnel/*`.
+- Funnel runtime state:
+  - `currentStepIndex`
+  - `answers`
+  - `qualificationScore` (derived)
+  - `videoProgress`
+  - `videoUnlocked`
+- Lightweight persistence uses `sessionStorage` key `wsr-interactive-funnel-v1`.
+- Video CTA unlock rule:
+  - unlock when playback reaches configured percentage (`ctaRevealPercent`), or
+  - unlock after configured fallback playback time (`fallbackRevealSeconds`).
+- Checkout destination is configurable via `VITE_FUNNEL_CHECKOUT_URL` with fallback in funnel content file.
+- Legacy marketing landing remains available in secondary route `/landing` (`src/pages/Landing.tsx`).
 
 ## Current Auth Architecture
 - `src/lib/session.ts` centralizes authenticated user state for the entire app.
@@ -74,7 +93,8 @@
 
 ## Route Access Model
 - Public routes:
-  - `/`
+  - `/` (interactive funnel)
+  - `/landing` (legacy landing)
 - Guest-only routes:
   - `/login`
   - `/register`
