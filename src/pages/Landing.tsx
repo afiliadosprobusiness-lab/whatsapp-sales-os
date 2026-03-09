@@ -166,11 +166,14 @@ export default function Landing() {
   const marqueeItems = [...testimonials, ...testimonials];
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#030712] text-slate-100">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(16,185,129,0.24),transparent_30%),radial-gradient(circle_at_85%_15%,rgba(56,189,248,0.2),transparent_30%),radial-gradient(circle_at_60%_80%,rgba(14,116,144,0.2),transparent_40%)]" />
+    <div className="wsr-landing-bg relative min-h-screen overflow-x-hidden text-slate-100">
+      <div className="wsr-orb wsr-orb-primary pointer-events-none" />
+      <div className="wsr-orb wsr-orb-secondary pointer-events-none" />
+      <div className="wsr-orb wsr-orb-tertiary pointer-events-none" />
+      <div className="wsr-grid-overlay pointer-events-none absolute inset-0 opacity-45" />
 
-      <nav className="fixed inset-x-0 top-0 z-50 border-b border-slate-800/70 bg-slate-950/75 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-6">
+      <nav className="fixed inset-x-0 top-4 z-50 px-4 md:px-6">
+        <div className="wsr-nav-shell mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6">
           <Link to="/" className="flex items-center">
             <BrandLogo size="sm" />
           </Link>
@@ -191,13 +194,13 @@ export default function Landing() {
           <div className="flex items-center gap-3">
             <Link
               to="/login"
-              className="hidden rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:border-emerald-400/60 hover:text-emerald-200 sm:inline-flex"
+              className="hidden rounded-lg border border-slate-600/70 bg-slate-900/70 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:border-emerald-400/60 hover:text-emerald-200 sm:inline-flex"
             >
               Iniciar sesión
             </Link>
             <Link
               to="/register"
-              className="inline-flex items-center rounded-lg bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950 transition-colors hover:bg-emerald-300"
+              className="inline-flex items-center rounded-lg bg-gradient-to-r from-emerald-300 to-cyan-300 px-4 py-2 text-sm font-semibold text-slate-950 transition-all duration-300 hover:shadow-[0_0_28px_rgba(45,212,191,0.4)]"
             >
               Empezar ahora
             </Link>
@@ -206,15 +209,15 @@ export default function Landing() {
       </nav>
 
       <main className="relative z-10">
-        <section id="hero" className="px-6 pb-12 pt-28 md:pb-16 md:pt-36">
+        <section id="hero" className="px-6 pb-14 pt-32 md:pb-20 md:pt-40">
           <div className="mx-auto grid w-full max-w-7xl gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
-            <div>
+            <div className="relative">
               <motion.div
                 initial="hidden"
                 animate="visible"
                 variants={fadeUp}
                 custom={0}
-                className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-200"
+                className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-300/35 bg-emerald-400/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-200 shadow-[0_0_22px_rgba(16,185,129,0.2)]"
               >
                 <MapPinned className="h-3.5 w-3.5" />
                 Diseñado para Perú y LATAM
@@ -225,7 +228,7 @@ export default function Landing() {
                 animate="visible"
                 variants={fadeUp}
                 custom={1}
-                className="font-display text-4xl font-bold leading-tight text-white md:text-6xl"
+                className="font-display text-4xl font-bold leading-tight text-white md:text-6xl lg:text-[4.1rem]"
               >
                 WhatsSalesRecovery
                 <span className="mt-2 block bg-gradient-to-r from-emerald-300 to-cyan-300 bg-clip-text text-transparent">
@@ -238,7 +241,7 @@ export default function Landing() {
                 animate="visible"
                 variants={fadeUp}
                 custom={2}
-                className="mt-6 max-w-xl text-base leading-relaxed text-slate-300 md:text-lg"
+                className="mt-6 max-w-xl text-base leading-relaxed text-slate-300 md:text-lg md:pr-6"
               >
                 Convierte conversaciones en cierres con una experiencia comercial moderna: seguimiento inteligente,
                 automatización y visibilidad completa del pipeline en un solo lugar.
@@ -253,14 +256,14 @@ export default function Landing() {
               >
                 <Link
                   to="/register"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-400 px-6 py-3 text-sm font-semibold text-slate-950 transition-all hover:bg-emerald-300"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-300 to-cyan-300 px-6 py-3 text-sm font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_32px_rgba(20,184,166,0.32)]"
                 >
                   Crear cuenta gratis
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <a
                   href="#testimonios"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-700 px-6 py-3 text-sm font-semibold text-slate-100 transition-colors hover:border-cyan-300/60 hover:text-cyan-200"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-600/70 bg-slate-900/60 px-6 py-3 text-sm font-semibold text-slate-100 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300/60 hover:text-cyan-200"
                 >
                   Ver casos reales
                   <ChevronRight className="h-4 w-4" />
@@ -274,11 +277,11 @@ export default function Landing() {
                 custom={4}
                 className="mt-8 grid gap-3 text-sm text-slate-300 sm:grid-cols-2"
               >
-                <p className="inline-flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900/45 px-3 py-2">
+                <p className="inline-flex items-center gap-2 rounded-lg border border-slate-700/70 bg-slate-900/70 px-3 py-2 shadow-[inset_0_1px_0_rgba(148,163,184,0.16)]">
                   <ShieldCheck className="h-4 w-4 text-emerald-300" />
                   Operación comercial ordenada para equipos en crecimiento.
                 </p>
-                <p className="inline-flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900/45 px-3 py-2">
+                <p className="inline-flex items-center gap-2 rounded-lg border border-slate-700/70 bg-slate-900/70 px-3 py-2 shadow-[inset_0_1px_0_rgba(148,163,184,0.16)]">
                   <Clock3 className="h-4 w-4 text-cyan-300" />
                   Menos tiempo respondiendo tarde, más tiempo cerrando ventas.
                 </p>
@@ -291,8 +294,8 @@ export default function Landing() {
               transition={{ duration: 0.6, delay: 0.25 }}
               className="relative"
             >
-              <div className="absolute -inset-4 rounded-[28px] bg-gradient-to-r from-emerald-400/20 via-cyan-400/15 to-blue-500/20 blur-2xl" />
-              <div className="relative overflow-hidden rounded-[24px] border border-slate-700/70 bg-slate-950/80 shadow-2xl shadow-cyan-950/40">
+              <div className="absolute -inset-6 rounded-[28px] bg-gradient-to-r from-emerald-400/25 via-cyan-400/20 to-blue-500/20 blur-3xl" />
+              <div className="wsr-hero-panel relative overflow-hidden rounded-[24px] border border-slate-600/70 bg-slate-950/85 shadow-2xl shadow-cyan-950/45">
                 <div className="border-b border-slate-800 bg-slate-900/80 p-4">
                   <div className="flex items-center gap-2">
                     <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
@@ -301,7 +304,7 @@ export default function Landing() {
                   </div>
                 </div>
                 <div className="grid gap-4 p-5 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-cyan-400/20 bg-cyan-500/5 p-4">
+                  <div className="rounded-2xl border border-cyan-300/30 bg-cyan-500/10 p-4 shadow-[inset_0_1px_0_rgba(125,211,252,0.25)]">
                     <p className="text-xs uppercase tracking-[0.16em] text-cyan-200/90">Ingreso recuperado</p>
                     <p className="mt-2 text-3xl font-semibold text-white">$48,320</p>
                     <p className="mt-2 text-sm text-emerald-300">+23% vs último periodo</p>
@@ -314,7 +317,7 @@ export default function Landing() {
                       </div>
                     </div>
                   </div>
-                  <div className="rounded-2xl border border-emerald-400/20 bg-emerald-500/5 p-4">
+                  <div className="rounded-2xl border border-emerald-300/30 bg-emerald-500/10 p-4 shadow-[inset_0_1px_0_rgba(110,231,183,0.25)]">
                     <p className="text-xs uppercase tracking-[0.16em] text-emerald-200/90">Mensajes priorizados</p>
                     <div className="mt-3 space-y-3">
                       <div className="rounded-xl border border-slate-700 bg-slate-900/70 p-3 text-sm text-slate-300">
@@ -328,7 +331,10 @@ export default function Landing() {
                 </div>
                 <div className="grid gap-3 border-t border-slate-800 p-5 sm:grid-cols-4">
                   {stats.map((item) => (
-                    <div key={item.label} className="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
+                    <div
+                      key={item.label}
+                      className="rounded-xl border border-slate-700/80 bg-slate-900/75 p-3 shadow-[inset_0_1px_0_rgba(148,163,184,0.13)]"
+                    >
                       <p className="text-[10px] uppercase tracking-[0.14em] text-slate-400">{item.label}</p>
                       <p className="mt-1 text-lg font-semibold text-white">{item.value}</p>
                       <p className="text-xs text-emerald-300">{item.delta}</p>
@@ -336,13 +342,19 @@ export default function Landing() {
                   ))}
                 </div>
               </div>
+              <div className="pointer-events-none absolute -left-6 top-8 hidden rounded-xl border border-cyan-300/30 bg-slate-950/90 px-3 py-2 text-xs text-cyan-200 shadow-xl shadow-cyan-950/40 md:block">
+                Tasa de cierre: 34%
+              </div>
+              <div className="pointer-events-none absolute -right-6 bottom-10 hidden rounded-xl border border-emerald-300/35 bg-slate-950/90 px-3 py-2 text-xs text-emerald-200 shadow-xl shadow-emerald-950/40 md:block">
+                Seguimientos hoy: 47
+              </div>
             </motion.div>
           </div>
         </section>
 
-        <section id="testimonios" className="wsr-testimonial-grid px-6 pb-16">
+        <section id="testimonios" className="px-6 pb-20">
           <div className="mx-auto max-w-7xl">
-            <div className="mb-8 rounded-3xl border border-cyan-400/20 bg-slate-900/35 p-6 backdrop-blur-sm">
+            <div className="wsr-section-shell mb-8 rounded-3xl p-6">
               <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">Testimonios</p>
@@ -355,7 +367,7 @@ export default function Landing() {
                   <button
                     type="button"
                     onClick={() => setMarqueeDirection("right")}
-                    className="rounded-xl border border-slate-700 bg-slate-950/70 p-2.5 text-slate-200 transition-colors hover:border-cyan-300/70 hover:text-cyan-200"
+                    className="rounded-xl border border-slate-600/80 bg-slate-950/70 p-2.5 text-slate-200 transition-colors hover:border-cyan-300/70 hover:text-cyan-200"
                     aria-label="Mover testimonios a la derecha"
                   >
                     <ChevronLeft className="h-4 w-4" />
@@ -363,7 +375,7 @@ export default function Landing() {
                   <button
                     type="button"
                     onClick={() => setMarqueeDirection("left")}
-                    className="rounded-xl border border-slate-700 bg-slate-950/70 p-2.5 text-slate-200 transition-colors hover:border-cyan-300/70 hover:text-cyan-200"
+                    className="rounded-xl border border-slate-600/80 bg-slate-950/70 p-2.5 text-slate-200 transition-colors hover:border-cyan-300/70 hover:text-cyan-200"
                     aria-label="Mover testimonios a la izquierda"
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -372,12 +384,12 @@ export default function Landing() {
               </div>
             </div>
 
-            <div className="md:hidden overflow-x-auto pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="wsr-testimonial-grid md:hidden overflow-x-auto rounded-3xl p-4 pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <div className="flex w-max snap-x snap-mandatory gap-4 pr-3">
                 {testimonials.map((item) => (
                   <article
                     key={`mobile-${item.name}`}
-                    className="w-[300px] shrink-0 snap-center rounded-[24px] border border-slate-700/80 bg-slate-900/80 p-2 shadow-lg shadow-cyan-950/25"
+                    className="w-[300px] shrink-0 snap-center rounded-[24px] border border-slate-600/80 bg-slate-900/85 p-2 shadow-lg shadow-cyan-950/25"
                   >
                     <img
                       src={item.avatar}
@@ -419,13 +431,14 @@ export default function Landing() {
               </div>
             </div>
 
-            <div className="hidden md:block wsr-marquee-mask overflow-hidden py-2">
-              <div className={`wsr-marquee-track ${marqueeDirection === "right" ? "wsr-marquee-reverse" : ""}`}>
-                {marqueeItems.map((item, index) => (
-                  <article
-                    key={`${item.name}-${index}`}
-                    className="group min-w-[330px] max-w-[330px] rounded-[24px] border border-slate-700/80 bg-slate-900/80 p-2 shadow-xl shadow-cyan-950/20 transition-transform hover:-translate-y-1"
-                  >
+            <div className="wsr-testimonial-grid hidden rounded-3xl p-4 md:block">
+              <div className="wsr-marquee-mask overflow-hidden py-2">
+                <div className={`wsr-marquee-track ${marqueeDirection === "right" ? "wsr-marquee-reverse" : ""}`}>
+                  {marqueeItems.map((item, index) => (
+                    <article
+                      key={`${item.name}-${index}`}
+                      className="group min-w-[330px] max-w-[330px] rounded-[24px] border border-slate-600/80 bg-slate-900/85 p-2 shadow-xl shadow-cyan-950/20 transition-transform hover:-translate-y-1"
+                    >
                     <img
                       src={item.avatar}
                       alt={`Foto ficticia de ${item.name}`}
@@ -462,15 +475,16 @@ export default function Landing() {
                       <p className="mt-2 text-xs text-cyan-300">{item.city}</p>
                     </div>
                   </article>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        <section id="fit" className="px-6 pb-16">
+        <section id="fit" className="px-6 pb-20">
           <div className="mx-auto grid w-full max-w-7xl gap-6 lg:grid-cols-2">
-            <div className="rounded-3xl border border-emerald-400/25 bg-emerald-500/5 p-6 md:p-8">
+            <div className="wsr-fit-positive rounded-3xl border p-6 md:p-8">
               <p className="mb-4 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-300">
                 <CheckCircle2 className="h-4 w-4" />
                 Esto es para ti: SÍ
@@ -486,7 +500,7 @@ export default function Landing() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-rose-400/20 bg-rose-500/5 p-6 md:p-8">
+            <div className="wsr-fit-negative rounded-3xl border p-6 md:p-8">
               <p className="mb-4 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-rose-300">
                 <XCircle className="h-4 w-4" />
                 Esto es para ti: NO
@@ -504,9 +518,9 @@ export default function Landing() {
           </div>
         </section>
 
-        <section id="features" className="px-6 pb-16">
+        <section id="features" className="px-6 pb-20">
           <div className="mx-auto grid w-full max-w-7xl gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-            <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 md:p-8">
+            <div className="wsr-section-shell rounded-3xl p-6 md:p-8">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">Plataforma</p>
               <h3 className="mt-3 font-display text-3xl font-bold text-white">Un sistema moderno para convertir más</h3>
               <p className="mt-4 text-sm leading-relaxed text-slate-300">
@@ -514,7 +528,10 @@ export default function Landing() {
               </p>
               <div className="mt-8 space-y-4">
                 {steps.map((item) => (
-                  <div key={item.step} className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
+                  <div
+                    key={item.step}
+                    className="rounded-2xl border border-slate-700/80 bg-slate-950/70 p-4 shadow-[inset_0_1px_0_rgba(148,163,184,0.14)]"
+                  >
                     <p className="text-xs font-semibold uppercase tracking-[0.15em] text-emerald-300">Paso {item.step}</p>
                     <h4 className="mt-1 text-base font-semibold text-white">{item.title}</h4>
                     <p className="mt-2 text-sm text-slate-400">{item.description}</p>
@@ -525,13 +542,16 @@ export default function Landing() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               {features.map((feature) => (
-                <div key={feature.title} className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
+                <div
+                  key={feature.title}
+                  className="rounded-3xl border border-slate-700/80 bg-slate-900/75 p-6 shadow-[inset_0_1px_0_rgba(148,163,184,0.15)] transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300/45"
+                >
                   <feature.icon className="h-6 w-6 text-emerald-300" />
                   <h4 className="mt-4 font-display text-xl font-semibold text-white">{feature.title}</h4>
                   <p className="mt-3 text-sm leading-relaxed text-slate-300">{feature.description}</p>
                 </div>
               ))}
-              <div className="rounded-3xl border border-cyan-400/25 bg-cyan-500/10 p-6 sm:col-span-2">
+              <div className="rounded-3xl border border-cyan-300/30 bg-gradient-to-r from-cyan-500/12 via-blue-500/10 to-emerald-500/12 p-6 shadow-[inset_0_1px_0_rgba(125,211,252,0.25)] sm:col-span-2">
                 <TrendingUp className="h-6 w-6 text-cyan-300" />
                 <h4 className="mt-4 font-display text-2xl font-semibold text-white">Listo para crecimiento regional</h4>
                 <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-200">
@@ -542,8 +562,8 @@ export default function Landing() {
           </div>
         </section>
 
-        <section className="px-6 pb-20">
-          <div className="mx-auto max-w-7xl rounded-3xl border border-emerald-400/25 bg-gradient-to-r from-emerald-500/15 via-cyan-500/10 to-blue-500/15 p-8 md:p-12">
+        <section className="px-6 pb-24">
+          <div className="wsr-cta-shell mx-auto max-w-7xl rounded-3xl p-8 md:p-12">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200">Comienza hoy</p>
@@ -557,14 +577,14 @@ export default function Landing() {
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Link
                   to="/register"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-300 px-6 py-3 text-sm font-semibold text-slate-950 transition-colors hover:bg-emerald-200"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-300 to-cyan-300 px-6 py-3 text-sm font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(45,212,191,0.3)]"
                 >
                   Crear cuenta gratis
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
                   to="/login"
-                  className="inline-flex items-center justify-center rounded-xl border border-slate-600 px-6 py-3 text-sm font-semibold text-slate-100 transition-colors hover:border-emerald-300/60 hover:text-emerald-200"
+                  className="inline-flex items-center justify-center rounded-xl border border-slate-500/70 bg-slate-950/65 px-6 py-3 text-sm font-semibold text-slate-100 transition-colors hover:border-emerald-300/60 hover:text-emerald-200"
                 >
                   Ingresar
                 </Link>
@@ -574,7 +594,7 @@ export default function Landing() {
         </section>
       </main>
 
-      <footer className="relative z-10 border-t border-slate-800/80 bg-slate-950/80 px-6 py-8">
+      <footer className="relative z-10 border-t border-slate-700/80 bg-slate-950/85 px-6 py-8 backdrop-blur-md">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 text-sm text-slate-400 md:flex-row md:items-center md:justify-between">
           <p>(c) 2026 WhatsSalesRecovery. Todos los derechos reservados.</p>
           <p>SaaS comercial para equipos de Perú y LATAM.</p>
