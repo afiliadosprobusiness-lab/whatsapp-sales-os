@@ -37,10 +37,10 @@ const testimonials = [
     company: "Moda Lima Store",
     city: "Lima, Perú",
     avatar: "/avatars/valeria.svg",
-    handle: "@maria_codshop",
+    handle: "@vale.moda",
     likes: "1.2 mil",
     message:
-      "Con WhatsSalesRecovery dejamos de perder chats en horas pico. Recuperamos ventas todos los días.",
+      "En dos semanas pasamos de responder tarde a tener un flujo diario claro. Hoy recuperamos ventas sin perseguir chats manualmente.",
   },
   {
     name: "Diego Palacios",
@@ -48,10 +48,10 @@ const testimonials = [
     company: "ElectroHogar PE",
     city: "Arequipa, Perú",
     avatar: "/avatars/diego.svg",
-    handle: "@dan_pedidos",
+    handle: "@diego.pipeline",
     likes: "986",
     message:
-      "Nuestro equipo duplicó el seguimiento efectivo y subió la tasa de cierre en menos de 30 días.",
+      "Duplicamos seguimientos efectivos y dejamos de improvisar. Cada asesor sabe qué lead atender primero y con qué mensaje.",
   },
   {
     name: "Andrea Ruiz",
@@ -59,10 +59,10 @@ const testimonials = [
     company: "Belleza Urbana",
     city: "Bogotá, Colombia",
     avatar: "/avatars/andrea.svg",
-    handle: "@vale.store",
+    handle: "@andrea.growth",
     likes: "1.8 mil",
     message:
-      "La vista de oportunidades en riesgo nos ayudó a priorizar mejor y vender con menos fricción.",
+      "La vista de oportunidades en riesgo nos cambió la operación: más foco comercial, menos fugas y mejor cierre por semana.",
   },
   {
     name: "Martin Salazar",
@@ -70,10 +70,10 @@ const testimonials = [
     company: "MarketPro MX",
     city: "CDMX, México",
     avatar: "/avatars/martin.svg",
-    handle: "@javi_cod",
+    handle: "@martin.pro",
     likes: "764",
     message:
-      "El sistema nos dio una operación más ordenada para LATAM, sin depender de hojas de cálculo.",
+      "Logramos estandarizar ventas entre equipos de Perú y México en el mismo tablero, sin depender de hojas de cálculo.",
   },
   {
     name: "Camila Torres",
@@ -84,7 +84,7 @@ const testimonials = [
     handle: "@camila.home",
     likes: "1.1 mil",
     message:
-      "Las secuencias de recuperación se sienten naturales y el equipo responde con mejor contexto.",
+      "Las secuencias de recuperación se sienten naturales y la ejecución del equipo mejoró porque cada conversación llega con contexto.",
   },
   {
     name: "José Herrera",
@@ -95,70 +95,70 @@ const testimonials = [
     handle: "@jose_revenue",
     likes: "842",
     message:
-      "Pasamos de reaccionar tarde a anticiparnos con alertas claras y acciones concretas.",
+      "Pasamos de reaccionar a destiempo a operar con alertas accionables. Ahora anticipamos caídas antes de perder la oportunidad.",
   },
 ];
 
 const yesList = [
-  "Vendes por WhatsApp y tienes leads sin seguimiento diario.",
-  "Tu equipo comercial necesita priorizar mejor y cerrar más rápido.",
-  "Quieres una operación simple para Perú y expansión en LATAM.",
-  "Buscas recuperar ventas perdidas sin sumar procesos manuales.",
+  "Tu canal principal de cierre es WhatsApp y hoy pierdes oportunidades por falta de seguimiento.",
+  "Tu equipo comercial necesita una prioridad diaria clara, no solo una lista de chats.",
+  "Quieres escalar de forma ordenada entre países de LATAM sin cambiar el proceso cada semana.",
+  "Buscas más cierres y menos tareas manuales en hojas de cálculo.",
 ];
 
 const noList = [
-  "Solo vendes por canal físico y no usas conversaciones digitales.",
-  "No tienes volumen de leads y prefieres un CRM básico sin automatización.",
-  "No quieres medir conversión ni tomar decisiones con datos.",
-  "Necesitas una solución cerrada para una sola tienda sin crecimiento.",
+  "Tu operación no vende por canales conversacionales y no planea hacerlo.",
+  "Tu volumen de leads es muy bajo y no necesitas automatización comercial.",
+  "Prefieres trabajar sin métricas ni seguimiento de conversión.",
+  "Buscas una herramienta estática para una sola tienda sin proyección de crecimiento.",
 ];
 
 const features = [
   {
     icon: MessageSquare,
-    title: "Conversaciones con contexto",
-    description: "Cada lead llega con historial, etapa y prioridad para responder con precisión.",
+    title: "Inbox comercial unificado",
+    description: "Centraliza conversaciones, etapa, valor potencial y contexto del cliente en una sola vista.",
   },
   {
     icon: Bot,
-    title: "Automatización comercial",
-    description: "Secuencias de seguimiento y recuperación para no dejar oportunidades en visto.",
+    title: "Playbooks automáticos",
+    description: "Activa secuencias de seguimiento y recuperación por reglas claras, sin perder timing comercial.",
   },
   {
     icon: LineChart,
-    title: "Decisión basada en revenue",
-    description: "Visualiza impacto real por campaña, canal y vendedor con foco en conversión.",
+    title: "Analítica accionable de revenue",
+    description: "Mide impacto real por campaña, canal y equipo para decidir con datos y no por intuición.",
   },
   {
     icon: Target,
-    title: "Priorización inteligente",
-    description: "Detecta prospectos con mayor probabilidad de cierre y acelera acciones.",
+    title: "Score de oportunidad en tiempo real",
+    description: "Detecta qué lead tiene más probabilidad de cierre y ejecuta la siguiente acción recomendada.",
   },
 ];
 
 const steps = [
   {
     step: "01",
-    title: "Conecta tu flujo actual",
-    description: "Importa leads y organiza conversaciones activas de tu operación comercial.",
+    title: "Consolida tu operación",
+    description: "Importa leads y conecta conversaciones para partir de una base limpia y accionable.",
   },
   {
     step: "02",
-    title: "Activa seguimiento automatizado",
-    description: "Define reglas de contacto para evitar que las oportunidades se enfríen.",
+    title: "Orquesta seguimiento por prioridad",
+    description: "Define reglas, tareas y alertas para que cada oportunidad reciba el siguiente paso correcto.",
   },
   {
     step: "03",
-    title: "Escala con enfoque LATAM",
-    description: "Opera con visibilidad clara por país, equipo y etapa del pipeline.",
+    title: "Escala con control ejecutivo",
+    description: "Monitorea performance por país, equipo y etapa para crecer con previsibilidad en LATAM.",
   },
 ];
 
 const stats = [
-  { label: "Leads activos", value: "1,284", delta: "+12%" },
-  { label: "Ventas recuperadas", value: "$48,320", delta: "+23%" },
-  { label: "Tasa de cierre", value: "34%", delta: "+5%" },
-  { label: "Seguimientos hoy", value: "47", delta: "8 urgentes" },
+  { label: "Conversaciones activas", value: "1,284", delta: "+12%" },
+  { label: "Ingreso recuperado", value: "$48,320", delta: "+23%" },
+  { label: "Cierre efectivo", value: "34%", delta: "+5 pts" },
+  { label: "Tareas críticas hoy", value: "47", delta: "8 urgentes" },
 ];
 
 export default function Landing() {
@@ -182,13 +182,13 @@ export default function Landing() {
               Inicio
             </a>
             <a href="#testimonios" className="transition-colors hover:text-emerald-300">
-              Testimonios
+              Casos reales
             </a>
             <a href="#fit" className="transition-colors hover:text-emerald-300">
-              Esto es para ti
+              Encaje
             </a>
             <a href="#features" className="transition-colors hover:text-emerald-300">
-              Plataforma
+              Producto
             </a>
           </div>
           <div className="flex items-center gap-3">
@@ -220,7 +220,7 @@ export default function Landing() {
                 className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-300/35 bg-emerald-400/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-200 shadow-[0_0_22px_rgba(16,185,129,0.2)]"
               >
                 <MapPinned className="h-3.5 w-3.5" />
-                Diseñado para Perú y LATAM
+                Sistema comercial para Perú y LATAM
               </motion.div>
 
               <motion.h1
@@ -232,7 +232,7 @@ export default function Landing() {
               >
                 WhatsSalesRecovery
                 <span className="mt-2 block bg-gradient-to-r from-emerald-300 to-cyan-300 bg-clip-text text-transparent">
-                  recupera ventas en tiempo real
+                  de conversaciones a ingresos predecibles
                 </span>
               </motion.h1>
 
@@ -243,8 +243,8 @@ export default function Landing() {
                 custom={2}
                 className="mt-6 max-w-xl text-base leading-relaxed text-slate-300 md:text-lg md:pr-6"
               >
-                Convierte conversaciones en cierres con una experiencia comercial moderna: seguimiento inteligente,
-                automatización y visibilidad completa del pipeline en un solo lugar.
+                Centraliza chats, prioriza oportunidades y activa seguimiento automático para que tu equipo cierre más
+                ventas con menos fricción operativa.
               </motion.p>
 
               <motion.div
@@ -258,14 +258,14 @@ export default function Landing() {
                   to="/register"
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-300 to-cyan-300 px-6 py-3 text-sm font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_32px_rgba(20,184,166,0.32)]"
                 >
-                  Crear cuenta gratis
+                  Probar gratis ahora
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <a
                   href="#testimonios"
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-600/70 bg-slate-900/60 px-6 py-3 text-sm font-semibold text-slate-100 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300/60 hover:text-cyan-200"
                 >
-                  Ver casos reales
+                  Ver cómo funciona
                   <ChevronRight className="h-4 w-4" />
                 </a>
               </motion.div>
@@ -279,11 +279,11 @@ export default function Landing() {
               >
                 <p className="inline-flex items-center gap-2 rounded-lg border border-slate-700/70 bg-slate-900/70 px-3 py-2 shadow-[inset_0_1px_0_rgba(148,163,184,0.16)]">
                   <ShieldCheck className="h-4 w-4 text-emerald-300" />
-                  Operación comercial ordenada para equipos en crecimiento.
+                  Pipeline, tareas y conversaciones en una sola operación.
                 </p>
                 <p className="inline-flex items-center gap-2 rounded-lg border border-slate-700/70 bg-slate-900/70 px-3 py-2 shadow-[inset_0_1px_0_rgba(148,163,184,0.16)]">
                   <Clock3 className="h-4 w-4 text-cyan-300" />
-                  Menos tiempo respondiendo tarde, más tiempo cerrando ventas.
+                  Menos improvisación comercial, más cierres por día.
                 </p>
               </motion.div>
             </div>
@@ -305,9 +305,9 @@ export default function Landing() {
                 </div>
                 <div className="grid gap-4 p-5 sm:grid-cols-2">
                   <div className="rounded-2xl border border-cyan-300/30 bg-cyan-500/10 p-4 shadow-[inset_0_1px_0_rgba(125,211,252,0.25)]">
-                    <p className="text-xs uppercase tracking-[0.16em] text-cyan-200/90">Ingreso recuperado</p>
+                    <p className="text-xs uppercase tracking-[0.16em] text-cyan-200/90">Ingreso recuperado (30 días)</p>
                     <p className="mt-2 text-3xl font-semibold text-white">$48,320</p>
-                    <p className="mt-2 text-sm text-emerald-300">+23% vs último periodo</p>
+                    <p className="mt-2 text-sm text-emerald-300">+23% vs mes anterior</p>
                     <div className="mt-4 space-y-2">
                       <div className="h-2 rounded-full bg-slate-800">
                         <div className="h-2 w-[78%] rounded-full bg-gradient-to-r from-emerald-300 to-cyan-300" />
@@ -321,10 +321,10 @@ export default function Landing() {
                     <p className="text-xs uppercase tracking-[0.16em] text-emerald-200/90">Mensajes priorizados</p>
                     <div className="mt-3 space-y-3">
                       <div className="rounded-xl border border-slate-700 bg-slate-900/70 p-3 text-sm text-slate-300">
-                        Lead de Lima solicita stock y envío rápido.
+                        Lead de Lima con alta intención: cotización enviada y seguimiento en 30 min.
                       </div>
                       <div className="rounded-xl border border-slate-700 bg-slate-900/70 p-3 text-sm text-slate-300">
-                        Cliente de CDMX listo para cerrar con descuento por volumen.
+                        Cliente de CDMX en etapa final: oferta optimizada para cierre por volumen.
                       </div>
                     </div>
                   </div>
@@ -343,10 +343,10 @@ export default function Landing() {
                 </div>
               </div>
               <div className="pointer-events-none absolute -left-6 top-8 hidden rounded-xl border border-cyan-300/30 bg-slate-950/90 px-3 py-2 text-xs text-cyan-200 shadow-xl shadow-cyan-950/40 md:block">
-                Tasa de cierre: 34%
+                Cierre efectivo: 34%
               </div>
               <div className="pointer-events-none absolute -right-6 bottom-10 hidden rounded-xl border border-emerald-300/35 bg-slate-950/90 px-3 py-2 text-xs text-emerald-200 shadow-xl shadow-emerald-950/40 md:block">
-                Seguimientos hoy: 47
+                8 tareas urgentes hoy
               </div>
             </motion.div>
           </div>
@@ -359,9 +359,9 @@ export default function Landing() {
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">Testimonios</p>
                   <h2 className="mt-2 font-display text-3xl font-bold text-white md:text-5xl">
-                    Historias reales de tiendas que venden más
+                    Resultados medibles en equipos reales
                   </h2>
-                  <p className="mt-2 text-sm text-slate-300">Desliza o usa las flechas para navegar</p>
+                  <p className="mt-2 text-sm text-slate-300">Historias de Perú, Colombia, México y Chile</p>
                 </div>
                 <div className="hidden items-center gap-2 md:flex">
                   <button
@@ -489,7 +489,7 @@ export default function Landing() {
                 <CheckCircle2 className="h-4 w-4" />
                 Esto es para ti: SÍ
               </p>
-              <h3 className="font-display text-2xl font-bold text-white">Si buscas escalar con orden comercial</h3>
+              <h3 className="font-display text-2xl font-bold text-white">Si ya vendes por chat y quieres escalar con control</h3>
               <div className="mt-6 space-y-3">
                 {yesList.map((item) => (
                   <p key={item} className="inline-flex items-start gap-2 text-sm leading-relaxed text-slate-200">
@@ -505,7 +505,7 @@ export default function Landing() {
                 <XCircle className="h-4 w-4" />
                 Esto es para ti: NO
               </p>
-              <h3 className="font-display text-2xl font-bold text-white">Si no necesitas automatización comercial</h3>
+              <h3 className="font-display text-2xl font-bold text-white">Si tu operación aún no necesita automatización comercial</h3>
               <div className="mt-6 space-y-3">
                 {noList.map((item) => (
                   <p key={item} className="inline-flex items-start gap-2 text-sm leading-relaxed text-slate-200">
@@ -522,9 +522,9 @@ export default function Landing() {
           <div className="mx-auto grid w-full max-w-7xl gap-6 xl:grid-cols-[0.9fr_1.1fr]">
             <div className="wsr-section-shell rounded-3xl p-6 md:p-8">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">Plataforma</p>
-              <h3 className="mt-3 font-display text-3xl font-bold text-white">Un sistema moderno para convertir más</h3>
+              <h3 className="mt-3 font-display text-3xl font-bold text-white">Un stack comercial completo para WhatsApp</h3>
               <p className="mt-4 text-sm leading-relaxed text-slate-300">
-                WhatsSalesRecovery combina control operativo y experiencia visual premium para equipos de ventas en LATAM.
+                Diseñado como un sistema modular: conversación, seguimiento, priorización y analítica en un flujo continuo.
               </p>
               <div className="mt-8 space-y-4">
                 {steps.map((item) => (
@@ -553,9 +553,9 @@ export default function Landing() {
               ))}
               <div className="rounded-3xl border border-cyan-300/30 bg-gradient-to-r from-cyan-500/12 via-blue-500/10 to-emerald-500/12 p-6 shadow-[inset_0_1px_0_rgba(125,211,252,0.25)] sm:col-span-2">
                 <TrendingUp className="h-6 w-6 text-cyan-300" />
-                <h4 className="mt-4 font-display text-2xl font-semibold text-white">Listo para crecimiento regional</h4>
+                <h4 className="mt-4 font-display text-2xl font-semibold text-white">Diseñado para operar equipos regionales</h4>
                 <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-200">
-                  Desde Lima hasta CDMX: define procesos replicables, mide conversión por equipo y construye una operación comercial consistente.
+                  Desde Lima hasta CDMX: define un playbook único, mide rendimiento por equipo y escala sin perder calidad de ejecución.
                 </p>
               </div>
             </div>
@@ -568,10 +568,10 @@ export default function Landing() {
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200">Comienza hoy</p>
                 <h3 className="mt-3 font-display text-3xl font-bold text-white md:text-4xl">
-                  Convierte conversaciones en ventas con WhatsSalesRecovery
+                  Haz que cada conversación tenga un próximo paso
                 </h3>
                 <p className="mt-3 max-w-2xl text-sm text-slate-200 md:text-base">
-                  Activa tu cuenta, integra tu flujo y empieza a recuperar ingresos en menos tiempo.
+                  Crea tu cuenta, carga tus leads y activa playbooks comerciales en minutos.
                 </p>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row">
@@ -579,7 +579,7 @@ export default function Landing() {
                   to="/register"
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-300 to-cyan-300 px-6 py-3 text-sm font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(45,212,191,0.3)]"
                 >
-                  Crear cuenta gratis
+                  Empezar prueba gratis
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
