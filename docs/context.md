@@ -313,11 +313,11 @@ Shared responsibilities:
 
 ## 6) Current context-level constraints and risks
 
-- Auth is integrated against production backend (`https://backend-production-80db.up.railway.app`) through `VITE_API_URL` (fallback `VITE_API_BASE_URL`).
+- Auth is integrated against production backend (`https://backend-production-80db.up.railway.app`) through `VITE_API_URL` (fallback `VITE_API_BASE_URL`), and in Vercel production now defaults to same-origin `/api` proxy rewrite.
 - No token or sensitive session data is persisted in `localStorage`; intended production strategy is cookie httpOnly + `GET /auth/me`.
 - Interactive funnel state persists only in `sessionStorage` (`wsr-interactive-funnel-v1`) for lightweight recovery.
 - Funnel checkout destination is configurable using `VITE_FUNNEL_CHECKOUT_URL` (fallback constant in `src/data/funnel-content.ts`).
-- Backend CORS currently whitelists `http://localhost:5173`; deployed frontend domain must be added in backend `FRONTEND_URL`.
+- Vercel deploy uses rewrite `/api/* -> backend-production-80db.up.railway.app/*` to avoid browser CORS mismatches on protected auth requests.
 - Role-based route gating is still pending (only authenticated/guest guards are implemented).
 - No explicit cross-context store; most pages own local mock data, except Settings, Leads, and Global Tasks Inbox which now use React Query + dedicated backend services.
 - WhatsApp channel/messages endpoints can be temporarily unavailable during Railway incident windows; frontend now includes unavailable fallbacks to avoid UI breaks until backend deploy stabilizes.

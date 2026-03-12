@@ -38,7 +38,8 @@
   - `POST /auth/login`
   - `POST /auth/logout`
   - `GET /auth/me`
-- API base URL is read from `VITE_API_URL` (fallback `VITE_API_BASE_URL`, then production URL default).
+- API base URL is read from `VITE_API_URL` (fallback `VITE_API_BASE_URL`).
+- Production default now uses same-origin `/api` (Vercel rewrite proxy to Railway backend), while local/dev fallback remains backend URL directly.
 - Auth state machine in provider: `idle | loading | success | error | unauthorized`.
 - No sensitive auth data is stored in `localStorage`.
 

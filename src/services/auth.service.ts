@@ -24,7 +24,7 @@ const AUTH_ENDPOINTS = {
   me: "/auth/me",
 } as const;
 
-const DEFAULT_API_URL = "https://backend-production-80db.up.railway.app";
+const DEFAULT_API_URL = import.meta.env.PROD ? "/api" : "https://backend-production-80db.up.railway.app";
 const API_BASE_URL = (import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE_URL ?? DEFAULT_API_URL).replace(
   /\/$/,
   "",

@@ -286,6 +286,8 @@ Contract:
   - `Content-Type: application/json`
   - `credentials: "include"`
   - No token persistence in `localStorage`
+  - Login body must send only `email` and `password` keys (no extra keys to satisfy backend validation).
+  - Register body must send `name`, `email`, `password`.
 - Expected success envelope:
   - `{ data: { user: { id, fullName|name, email, role? } }, error: null }`
 - Expected error envelope:
@@ -516,3 +518,4 @@ Contract:
 | 2026-03-09 | Public index route migrated from static landing to interactive qualification funnel (`/`) with persistent progress, answer capture, gated video CTA, transition screens, and final checkout flow; legacy landing moved to `/landing`. | non-breaking | Marketing entry now uses guided conversion flow while keeping previous landing available as secondary route. |
 | 2026-03-11 | Public entry was reassigned to redesigned landing with ROI-focused copy and WhatsApp official API value narrative (`/` and `/landing`), while interactive funnel remains reachable at `/quiz`. | non-breaking | Main acquisition route now prioritizes marketing clarity and measurable outcomes without removing funnel experience. |
 | 2026-03-12 | Frontend-only superadmin route added (`/superadmin`) with fixed credential login path, one-click plan changes for users, user create/delete actions, and hard delete lock for superadmin account. | non-breaking | Adds isolated operational panel without backend dependency or impact on existing authenticated workspace flows. |
+| 2026-03-12 | Auth payload alignment updated (`login` without `rememberMe`, `register` with `name`) and Vercel SPA/API rewrites added (`/api/*` proxy + `index.html` fallback). | non-breaking | Restores login compatibility with backend validation and prevents route-refresh/CORS failures in Vercel deployments. |
