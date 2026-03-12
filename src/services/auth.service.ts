@@ -210,7 +210,7 @@ const toAuthResponse = (payload: unknown): AuthResponse => {
 };
 
 const toRegisterPayload = (payload: AuthRegisterRequest): AuthRegisterPayload => ({
-  fullName: payload.fullName.trim(),
+  name: payload.fullName.trim(),
   email: payload.email.trim().toLowerCase(),
   password: payload.password,
 });
@@ -256,7 +256,6 @@ const authService: AuthService = {
       body: JSON.stringify({
         email: payload.email.trim().toLowerCase(),
         password: payload.password,
-        rememberMe: payload.rememberMe,
       }),
     });
 

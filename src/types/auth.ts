@@ -26,7 +26,7 @@ export interface AuthRegisterRequest {
 }
 
 export interface AuthRegisterPayload {
-  fullName: string;
+  name: string;
   email: string;
   password: string;
 }
