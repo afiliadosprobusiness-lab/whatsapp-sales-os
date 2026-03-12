@@ -5,7 +5,7 @@ This document describes functional and structural contracts inferred from the cu
 
 Current status in codebase:
 - SPA with React + React Router.
-- Public index route now serves an interactive qualification funnel (quiz + VSL style flow) instead of the legacy static landing.
+- Public index route now serves the redesigned marketing landing; interactive qualification funnel remains available as dedicated route.
 - All domain screens exist as routes.
 - Most domain screens still render static/mock data (local arrays inside page components), except Auth, Workspace Settings, and Leads.
 - Auth module is integrated to production API with cookie session.
@@ -20,10 +20,12 @@ Current status in codebase:
 - `@tanstack/react-query` is configured globally and is now used by Settings business profile integration.
 
 Routes implemented:
-- `/` Interactive qualification funnel
-- `/landing` Legacy landing
+- `/` Landing (redesigned)
+- `/landing` Landing alias
+- `/quiz` Interactive qualification funnel
 - `/login` Login
 - `/register` Register
+- `/superadmin` Superadmin user management (frontend-only)
 - `/dashboard` Overview
 - `/leads`
 - `/tasks`
@@ -42,9 +44,10 @@ Routes implemented:
 
 | Module | Route | Main visible structures |
 |---|---|---|
-| Interactive Funnel | `/` | Multi-step guided flow, persistent progress bar, quiz question cards, reinforcement step, gated video CTA, authority/program/bonuses/objection/social-proof/final-offer steps, loading transitions, configurable checkout CTA |
-| Landing (legacy) | `/landing` | Hero, feature cards, process steps, use-case cards, CTA sections |
+| Landing | `/`, `/landing` | Hero de conversion, prueba social numerica, beneficios claros por impacto comercial, CTA hacia registro/login |
+| Interactive Funnel | `/quiz` | Multi-step guided flow, persistent progress bar, quiz question cards, reinforcement step, gated video CTA, authority/program/bonuses/objection/social-proof/final-offer steps, loading transitions, configurable checkout CTA |
 | Auth | `/login`, `/register` | Two-panel auth layout, credential forms, social auth button |
+| Superadmin User Panel | `/superadmin` | Frontend-only panel for user CRUD basics, one-click plan changes, and immutable superadmin account lock |
 | Dashboard Overview | `/dashboard` | KPI metric cards, mock chart, insights cards, leads table, activity feed, alert widgets |
 | Leads | `/leads` | Pipeline stage cards, lead table, filters, detail side panel |
 | Tasks Inbox | `/tasks` | Global follow-up/task list, filter chips, optional summary counters, quick done action, lead navigation |
@@ -306,8 +309,9 @@ Contract:
 - Lightweight persistence:
   - `sessionStorage` key: `wsr-interactive-funnel-v1`
 - Routing contract:
-  - `/` interactive funnel
-  - `/landing` legacy landing retained for secondary access
+  - `/` redesigned landing (primary public entry)
+  - `/landing` landing alias retained for compatibility
+  - `/quiz` interactive funnel flow
 
 ### 8.2 Users / Workspace
 UI evidence:
@@ -490,6 +494,7 @@ Contract:
 ## 10) Current gaps to preserve during implementation
 
 - Authentication guards are active for private routes and guest-only auth routes.
+- Superadmin route uses a dedicated frontend guard and does not rely on backend session.
 - Auth API, workspace settings, and leads integration are active; remaining domain modules are still UI-only mock data.
 - `Index.tsx` exists but is not routed from `App.tsx`.
 - `App.css` keeps Vite template styles and appears unused by current pages.
@@ -509,3 +514,5 @@ Contract:
 | 2026-03-08 | Global tasks inbox contract connected (`/tasks` GET, optional `/tasks/summary` GET, optional `/tasks/:id/status` PATCH) with workspace-wide filters and lead navigation support. | non-breaking | Operators can now run follow-up execution from one global queue without leaving dashboard scope. |
 | 2026-03-09 | WhatsApp frontend contract connected to backend-owned channel + lead messaging (`GET/POST/PATCH /channels/whatsapp`, `POST /leads/:id/messages`, message view derived from `GET /leads/:id/activity`) with graceful handling for `404/501/503/timeout` during Railway incident windows. | non-breaking | CRM now exposes WhatsApp setup and manual messaging UX without direct provider calls; features auto-activate when backend deploy finishes. |
 | 2026-03-09 | Public index route migrated from static landing to interactive qualification funnel (`/`) with persistent progress, answer capture, gated video CTA, transition screens, and final checkout flow; legacy landing moved to `/landing`. | non-breaking | Marketing entry now uses guided conversion flow while keeping previous landing available as secondary route. |
+| 2026-03-11 | Public entry was reassigned to redesigned landing with ROI-focused copy and WhatsApp official API value narrative (`/` and `/landing`), while interactive funnel remains reachable at `/quiz`. | non-breaking | Main acquisition route now prioritizes marketing clarity and measurable outcomes without removing funnel experience. |
+| 2026-03-12 | Frontend-only superadmin route added (`/superadmin`) with fixed credential login path, one-click plan changes for users, user create/delete actions, and hard delete lock for superadmin account. | non-breaking | Adds isolated operational panel without backend dependency or impact on existing authenticated workspace flows. |

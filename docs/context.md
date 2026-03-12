@@ -32,18 +32,20 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
   - `src/data/funnel-content.ts`
   - `src/types/funnel.ts`
 - Inputs/outputs:
-  - Input: anonymous visit.
+  - Input: anonymous visit to `/quiz`.
   - Output: funnel progression and checkout redirect.
 
-### B) Legacy Landing Context
-- Purpose: keep previous marketing landing available as secondary route and support classic CTA navigation.
+### B) Marketing Landing Context
+- Purpose: provide the primary public acquisition page with clear ROI narrative, measurable outcomes, and WhatsApp official API trust signals.
 - Responsibilities:
-  - Legacy hero/features/testimonials narrative.
+  - Hero with numeric proof and business-change messaging.
+  - Product narrative in clear language focused on measurable outcomes.
+  - WhatsApp official API trust framing and integration value.
   - Conversion to auth routes.
 - Main screens/components:
   - `src/pages/Landing.tsx`
 - Inputs/outputs:
-  - Input: anonymous visit to `/landing`.
+  - Input: anonymous visit to `/` or `/landing`.
   - Output: navigate to `/login` or `/register`.
 
 ### C) Auth Context
@@ -267,17 +269,33 @@ WhatsSalesRecovery is presented as a WhatsApp sales operating system for LATAM b
   - Input: admin-level config changes.
   - Output: system-wide behavior flags and integration availability.
 
+### R) Superadmin User Management Context
+- Purpose: provide a frontend-only control panel to manage users.
+- Responsibilities:
+  - Protect access with a dedicated superadmin guard (`/superadmin`).
+  - Authenticate superadmin using fixed frontend credentials from login flow.
+  - Manage user list in local frontend state (create user, delete user, one-click plan change).
+  - Enforce hard deletion lock for superadmin account.
+- Main screens/components:
+  - `src/pages/SuperAdmin.tsx`
+  - `src/guards/RequireSuperAdmin.tsx`
+  - `src/lib/superadmin.ts`
+- Inputs/outputs:
+  - Input: user management actions from superadmin panel.
+  - Output: immediate UI state changes for users and plans (frontend only, no backend persistence).
+
 ## 4) Relations between contexts
 
 Primary dependency flow in current product model:
-1. Public Qualification Funnel (`/`) -> Checkout intent.
-2. Legacy Landing (`/landing`) -> Auth (`/login`, `/register`) -> Workspace.
-3. Workspace provides scope for Leads, Global Tasks Inbox, Conversations, Campaigns, Recovery, and Settings.
-4. Settings publishes channel configuration (including WhatsApp provider status) consumed by Leads and future Conversations runtime.
-5. Leads, Global Tasks Inbox, and Conversations feed Deal Probability and Recovery.
-6. Offer Optimization and Chatbot provide content/automation improvements for Conversations and Campaigns.
-7. Campaigns and Recovery outcomes feed Revenue Intelligence and Revenue Reports.
-8. Dashboard Overview aggregates outputs from Leads, Conversations, Recovery, Campaigns, and Revenue.
+1. Marketing Landing (`/`, `/landing`) -> Auth (`/login`, `/register`) -> Workspace.
+2. Public Qualification Funnel (`/quiz`) -> Checkout intent.
+3. Superadmin Login (`/login` with fixed credential) -> Superadmin User Management (`/superadmin`).
+4. Workspace provides scope for Leads, Global Tasks Inbox, Conversations, Campaigns, Recovery, and Settings.
+5. Settings publishes channel configuration (including WhatsApp provider status) consumed by Leads and future Conversations runtime.
+6. Leads, Global Tasks Inbox, and Conversations feed Deal Probability and Recovery.
+7. Offer Optimization and Chatbot provide content/automation improvements for Conversations and Campaigns.
+8. Campaigns and Recovery outcomes feed Revenue Intelligence and Revenue Reports.
+9. Dashboard Overview aggregates outputs from Leads, Conversations, Recovery, Campaigns, and Revenue.
 
 ## 5) Shared cross-context UI infrastructure
 
@@ -304,3 +322,4 @@ Shared responsibilities:
 - No explicit cross-context store; most pages own local mock data, except Settings, Leads, and Global Tasks Inbox which now use React Query + dedicated backend services.
 - WhatsApp channel/messages endpoints can be temporarily unavailable during Railway incident windows; frontend now includes unavailable fallbacks to avoid UI breaks until backend deploy stabilizes.
 - Some text encoding artifacts appear in Spanish labels; should be normalized before production content freeze.
+- Superadmin panel is frontend-only and stores session/users in browser state/storage; data is not persisted server-side.

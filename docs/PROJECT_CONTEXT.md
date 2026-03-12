@@ -7,8 +7,10 @@
 - Framer Motion for funnel transitions and animated step changes.
 - `@tanstack/react-query` configured globally (already used in Settings workspace profile, WhatsApp channel, Leads, lead messaging, and global tasks).
 
-## Current Public Funnel Architecture
-- Public home (`/`) now renders `src/pages/InteractiveFunnel.tsx`.
+## Current Public Marketing/Funnel Architecture
+- Public home (`/`) now renders `src/pages/Landing.tsx`.
+- Landing alias (`/landing`) also renders `src/pages/Landing.tsx`.
+- Interactive qualification funnel now renders at `/quiz` via `src/pages/InteractiveFunnel.tsx`.
 - Funnel content is centralized in `src/data/funnel-content.ts`.
 - Funnel types and extensibility hooks live in `src/types/funnel.ts`.
 - Reusable funnel UI blocks live in `src/components/funnel/*`.
@@ -26,7 +28,7 @@
   - unlock when playback reaches configured percentage (`ctaRevealPercent`), or
   - unlock after configured fallback playback time (`fallbackRevealSeconds`).
 - Checkout destination is configurable via `VITE_FUNNEL_CHECKOUT_URL` with fallback in funnel content file.
-- Legacy marketing landing remains available in secondary route `/landing` (`src/pages/Landing.tsx`).
+- Marketing landing content now emphasizes clear ROI language, numeric proof, and WhatsApp official API benefits.
 
 ## Current Auth Architecture
 - `src/lib/session.ts` centralizes authenticated user state for the entire app.
@@ -39,6 +41,19 @@
 - API base URL is read from `VITE_API_URL` (fallback `VITE_API_BASE_URL`, then production URL default).
 - Auth state machine in provider: `idle | loading | success | error | unauthorized`.
 - No sensitive auth data is stored in `localStorage`.
+
+## Current Superadmin Frontend Architecture
+- Superadmin access is frontend-only and separate from backend auth session.
+- Dedicated helpers in `src/lib/superadmin.ts` provide:
+  - fixed superadmin credential validation from login.
+  - local session storage handling (`wsr-superadmin-session-v1`).
+  - superadmin identity lock rules.
+- Dedicated route guard in `src/guards/RequireSuperAdmin.tsx` protects `/superadmin`.
+- Superadmin panel in `src/pages/SuperAdmin.tsx` is scoped to user management only:
+  - create users
+  - one-click plan changes
+  - delete users (except locked superadmin account)
+- User operations are frontend state only (no API persistence).
 
 ## Current Workspace Settings Architecture
 - `src/services/workspace.service.ts` handles workspace requests with `fetch` + `credentials: "include"`.
@@ -96,11 +111,14 @@
 
 ## Route Access Model
 - Public routes:
-  - `/` (interactive funnel)
-  - `/landing` (legacy landing)
+  - `/` (marketing landing, primary)
+  - `/landing` (marketing landing alias)
+  - `/quiz` (interactive funnel)
 - Guest-only routes:
   - `/login`
   - `/register`
+- Superadmin-only routes (guarded by frontend local session):
+  - `/superadmin`
 - Private routes (guarded by auth session):
   - `/dashboard`
   - `/leads`

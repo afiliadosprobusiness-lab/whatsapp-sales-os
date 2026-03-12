@@ -65,7 +65,8 @@ Keep dashboard UI consistent using existing `ventrix-*` tokens, utilities, and c
 - New modules should extend this baseline, not replace it.
 
 ## 9) Interactive Funnel Pattern
-- Public home funnel (`/`) follows a dark premium, mobile-first conversion style.
+- Interactive funnel route (`/quiz`) follows a dark premium, mobile-first conversion style.
+- Public home (`/`) now maps to the marketing landing and should keep a premium conversion narrative with clear numeric proof.
 - Visual language:
   - gradients + glow accents with high-contrast typography.
   - large tap targets and card-based choices.

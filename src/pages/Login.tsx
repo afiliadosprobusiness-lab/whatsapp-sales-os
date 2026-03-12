@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { useAuth } from "@/lib/session";
+import { createSuperAdminSession, hasSuperAdminSession, isSuperAdminCredentials } from "@/lib/superadmin";
 import { authServiceErrors } from "@/services/auth.service";
 
 export default function Login() {
@@ -22,6 +23,14 @@ export default function Login() {
     clearError();
   }, [clearError]);
 
+  useEffect(() => {
+    if (!hasSuperAdminSession()) {
+      return;
+    }
+
+    navigate("/superadmin", { replace: true });
+  }, [navigate]);
+
   const redirectTo = useMemo(() => {
     const fromState = (location.state as { from?: string } | null)?.from;
     return typeof fromState === "string" && fromState.startsWith("/") ? fromState : "/dashboard";
@@ -33,18 +42,27 @@ export default function Login() {
     setSubmitSuccess(null);
     clearError();
 
-    if (!email.trim() || !password.trim()) {
-      setSubmitError("Completa email y contraseña para iniciar sesión.");
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!normalizedEmail || !password.trim()) {
+      setSubmitError("Completa email y contrasena para iniciar sesion.");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      await login({ email: email.trim(), password, rememberMe });
-      setSubmitSuccess("Sesión iniciada. Redirigiendo...");
+      if (isSuperAdminCredentials(normalizedEmail, password)) {
+        createSuperAdminSession();
+        setSubmitSuccess("Acceso superadmin habilitado. Redirigiendo...");
+        navigate("/superadmin", { replace: true });
+        return;
+      }
+
+      await login({ email: normalizedEmail, password, rememberMe });
+      setSubmitSuccess("Sesion iniciada. Redirigiendo...");
       navigate(redirectTo, { replace: true });
     } catch (error) {
-      setSubmitError(authServiceErrors.getMessage(error, "No pudimos iniciar sesión."));
+      setSubmitError(authServiceErrors.getMessage(error, "No pudimos iniciar sesion."));
     } finally {
       setIsSubmitting(false);
     }
@@ -65,17 +83,17 @@ export default function Login() {
         <div className="relative z-10 max-w-md">
           <BrandLogo className="mb-8" />
           <h2 className="font-display text-3xl font-bold mb-4" style={{ color: "hsl(0 0% 95%)" }}>
-            Recupera ventas que creías perdidas
+            Recupera ventas que creias perdidas
           </h2>
           <p className="text-base mb-10" style={{ color: "hsl(220 10% 60%)" }}>
-            Más de 2,400 negocios en LATAM usan WhatsSalesRecovery para organizar sus ventas por WhatsApp y aumentar
+            Mas de 2,400 negocios en LATAM usan WhatsSalesRecovery para organizar sus ventas por WhatsApp y aumentar
             sus cierres.
           </p>
           <div className="space-y-4">
             {[
-              "Organización automática de leads",
+              "Organizacion automatica de leads",
               "Seguimiento inteligente por WhatsApp",
-              "Recuperación de ventas perdidas",
+              "Recuperacion de ventas perdidas",
               "Reportes de ingresos en tiempo real",
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-3">
@@ -114,13 +132,13 @@ export default function Login() {
             </div>
             <div>
               <label className="text-xs font-medium text-muted-foreground mb-1.5 block" htmlFor="login-password">
-                Contraseña
+                Contrasena
               </label>
               <div className="relative">
                 <input
                   id="login-password"
                   type={showPass ? "text" : "password"}
-                  placeholder="••••••••"
+                  placeholder="********"
                   className="ventrix-input pr-10"
                   autoComplete="current-password"
                   value={password}
@@ -147,7 +165,7 @@ export default function Login() {
                 Recordarme
               </label>
               <a href="#" className="text-primary hover:underline">
-                ¿Olvidaste tu contraseña?
+                Olvidaste tu contrasena?
               </a>
             </div>
 
@@ -169,7 +187,7 @@ export default function Login() {
               className="ventrix-btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-70"
             >
               {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-              {isSubmitting ? "Iniciando sesión..." : "Iniciar sesión"}
+              {isSubmitting ? "Iniciando sesion..." : "Iniciar sesion"}
             </button>
 
             <div className="relative my-6">
@@ -177,7 +195,7 @@ export default function Login() {
                 <div className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs text-muted-foreground">
-                <span className="bg-background px-3">o continúa con</span>
+                <span className="bg-background px-3">o continua con</span>
               </div>
             </div>
 
@@ -208,7 +226,7 @@ export default function Login() {
           </form>
 
           <p className="text-center text-xs text-muted-foreground mt-8">
-            ¿No tienes cuenta?{" "}
+            No tienes cuenta?{" "}
             <Link to="/register" className="text-primary font-medium hover:underline">
               Crear cuenta gratis
             </Link>
