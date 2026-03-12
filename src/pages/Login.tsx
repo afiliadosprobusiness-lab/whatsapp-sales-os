@@ -28,7 +28,7 @@ export default function Login() {
       return;
     }
 
-    navigate("/superadmin", { replace: true });
+    window.location.replace("/superadmin");
   }, [navigate]);
 
   const redirectTo = useMemo(() => {
@@ -54,7 +54,7 @@ export default function Login() {
       if (isSuperAdminCredentials(normalizedEmail, password)) {
         createSuperAdminSession();
         setSubmitSuccess("Acceso superadmin habilitado. Redirigiendo...");
-        navigate("/superadmin", { replace: true });
+        window.location.replace("/superadmin");
         return;
       }
 

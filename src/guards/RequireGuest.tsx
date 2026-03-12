@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/lib/session";
+import { hasSuperAdminSession } from "@/lib/superadmin";
 
 function AuthLoadingScreen() {
   return (
@@ -14,6 +15,10 @@ function AuthLoadingScreen() {
 
 export function RequireGuest() {
   const { isAuthenticated, status } = useAuth();
+
+  if (hasSuperAdminSession()) {
+    return <Navigate to="/superadmin" replace />;
+  }
 
   if (status === "idle" || status === "loading") {
     return <AuthLoadingScreen />;
